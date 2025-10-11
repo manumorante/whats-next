@@ -99,9 +99,27 @@ Activities are scored based on multiple factors:
 - `npm run dev` - Start development server with Turbopack
 - `npm run build` - Build for production
 - `npm run start` - Start production server
+- `npm test` - Run tests in watch mode
+- `npm run test:run` - Run tests once
+- `npm run test:coverage` - Run tests with coverage report
 - `npm run lint` - Run Biome linter
 - `npm run format` - Format code with Biome
 - `npm run check` - Lint and format with auto-fix
+
+### Testing
+
+Tests are built with **Vitest** and **Testing Library**. Coverage includes:
+
+- **Unit Tests**: Algorithm logic, context matching, type validation
+- **Integration Tests**: API client, hooks with SWR
+- **Component Tests**: UI rendering and interactions
+
+Run tests:
+```bash
+npm test              # Watch mode
+npm run test:run      # Single run
+npm run test:coverage # With coverage
+```
 
 ### Project Structure
 
