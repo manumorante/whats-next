@@ -232,17 +232,6 @@ export function ActivityCard({
             </div>
           </div>
         )}
-
-        {/* Completion stats */}
-        {activity.completions_count !== undefined && activity.completions_count > 0 && (
-          <p className="text-xs text-neutral-500 mt-2">
-            Completada {activity.completions_count}{' '}
-            {activity.completions_count === 1 ? 'vez' : 'veces'}
-            {activity.last_completed && (
-              <> · Última: {new Date(activity.last_completed).toLocaleDateString('es-ES')}</>
-            )}
-          </p>
-        )}
       </div>
     </details>
   );

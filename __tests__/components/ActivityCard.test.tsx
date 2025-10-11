@@ -76,17 +76,6 @@ describe('ActivityCard Component', () => {
     expect(checkbox).toBeDefined();
   });
 
-  it('should display completion stats when available', () => {
-    const activityWithStats: ActivityWithDetails = {
-      ...mockActivity,
-      completions_count: 5,
-      last_completed: new Date().toISOString(),
-    };
-
-    render(<ActivityCard activity={activityWithStats} />);
-    expect(screen.getByText(/Completada 5 veces/i)).toBeDefined();
-  });
-
   it('should show score and reason when provided', () => {
     render(<ActivityCard activity={mockActivity} score={75} reason="Test reason" />);
 
