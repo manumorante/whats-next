@@ -22,7 +22,6 @@ describe('ActivityCard Component', () => {
     title: 'Test Activity',
     description: 'Test description',
     category_id: 1,
-    duration_minutes: 30,
     energy_level: 'medium',
     location: 'home',
     priority: 'important',
@@ -63,11 +62,6 @@ describe('ActivityCard Component', () => {
 
     // Now category should be visible
     expect(screen.getByText('Productiva')).toBeDefined();
-  });
-
-  it('should show duration', () => {
-    render(<ActivityCard activity={mockActivity} />);
-    expect(screen.getByText('30 min')).toBeDefined();
   });
 
   it('should show energy level', () => {

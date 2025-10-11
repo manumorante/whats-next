@@ -51,8 +51,6 @@ export function useActivities(filters?: GetActivitiesFilters) {
             if (data.category_id !== undefined) updated.category_id = data.category_id;
             if (data.priority !== undefined) updated.priority = data.priority;
             if (data.energy_level !== undefined) updated.energy_level = data.energy_level;
-            if (data.duration_minutes !== undefined)
-              updated.duration_minutes = data.duration_minutes;
             if (data.location !== undefined) updated.location = data.location;
             if (data.is_recurring !== undefined) updated.is_recurring = data.is_recurring ? 1 : 0;
             if (data.recurrence_type !== undefined) updated.recurrence_type = data.recurrence_type;

@@ -70,6 +70,5 @@ describe('Type Definitions', () => {
 
     expect(minimalActivity.description).toBeUndefined();
     expect(minimalActivity.category_id).toBeUndefined();
-    expect(minimalActivity.duration_minutes).toBeUndefined();
   });
 });

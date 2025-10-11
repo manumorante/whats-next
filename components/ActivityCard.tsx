@@ -180,17 +180,6 @@ export function ActivityCard({
               displayFormatter={(value) => priorityLabels[value as keyof typeof priorityLabels]}
             />
 
-            {/* Duration */}
-            <EditableInput
-              value={activity.duration_minutes}
-              onSave={(value) => updateField('duration_minutes', value)}
-              placeholder="Añadir duración"
-              type="number"
-              min={1}
-              displayFormatter={(value) => (value ? `${value} min` : 'Añadir duración')}
-              inputClassName="w-16 px-2 py-0.5 bg-neutral-800 text-neutral-300 text-xs rounded focus:outline-none"
-            />
-
             {/* Energy Level */}
             <EditableBadge
               value={activity.energy_level || 'medium'}

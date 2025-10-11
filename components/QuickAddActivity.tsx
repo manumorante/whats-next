@@ -54,7 +54,6 @@ export function QuickAddActivity({ onAdd }: QuickAddActivityProps) {
       category_id: suggestedCategoryId,
       priority: suggestedPriority,
       energy_level: suggestedEnergyLevel,
-      duration_minutes: 30,
       context_ids: activeContexts?.map((c) => c.id) || [],
     };
   };

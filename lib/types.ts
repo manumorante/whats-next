@@ -39,7 +39,6 @@ export interface Activity {
   title: string;
   description: string | null;
   category_id: number | null;
-  duration_minutes: number | null;
   energy_level: EnergyLevel | null;
   location: string | null;
   priority: Priority;
@@ -98,7 +97,6 @@ export interface CreateActivityRequest {
   title: string;
   description?: string;
   category_id?: number;
-  duration_minutes?: number;
   energy_level?: EnergyLevel;
   location?: string;
   priority?: Priority;

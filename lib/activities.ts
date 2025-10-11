@@ -76,7 +76,6 @@ export async function getActivities(
       title: row.title as string,
       description: row.description as string | null,
       category_id: row.category_id as number | null,
-      duration_minutes: row.duration_minutes as number | null,
       energy_level: row.energy_level as string | null as ActivityWithDetails['energy_level'],
       location: row.location as string | null,
       priority: row.priority as string as ActivityWithDetails['priority'],
@@ -157,15 +156,14 @@ export async function createActivity(data: CreateActivityRequest): Promise<numbe
   const result = await db.execute({
     sql: `
       INSERT INTO activities (
-        title, description, category_id, duration_minutes,
+        title, description, category_id,
         energy_level, location, priority, is_recurring, recurrence_type
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `,
     args: [
       data.title.trim(),
       data.description || null,
       data.category_id || null,
-      data.duration_minutes || null,
       data.energy_level || null,
       data.location || null,
       data.priority || 'someday',
@@ -222,11 +220,6 @@ export async function updateActivity(id: number, data: UpdateActivityRequest): P
   if (data.category_id !== undefined) {
     fields.push('category_id = ?');
     args.push(data.category_id || null);
-  }
-
-  if (data.duration_minutes !== undefined) {
-    fields.push('duration_minutes = ?');
-    args.push(data.duration_minutes || null);
   }
 
   if (data.energy_level !== undefined) {

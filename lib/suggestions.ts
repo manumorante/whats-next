@@ -100,16 +100,6 @@ export async function getSuggestedActivities(
       }
     }
 
-    // Duration bonus (prefer shorter activities during tight time windows)
-    if (activity.duration_minutes) {
-      if (activity.duration_minutes <= 30) {
-        score += 10;
-        reasons.push(`${activity.duration_minutes} min`);
-      } else {
-        reasons.push(`~${activity.duration_minutes} min`);
-      }
-    }
-
     // Energy level consideration (based on time of day)
     if (activity.energy_level) {
       const hour = now.getHours();
