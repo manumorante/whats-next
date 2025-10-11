@@ -16,7 +16,7 @@ export default function Home() {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <header className="mb-8">
-          <h1 className="text-3xl font-bold text-neutral-100 mb-2">What&apos;s Next?</h1>
+          <h1 className="text-3xl font-bold text-neutral-100 mb-2">¿Qué sigue?</h1>
           <p className="text-neutral-400 text-sm">
             Actividades inteligentes según tu momento del día
           </p>

@@ -20,7 +20,7 @@ describe('CategoryFilter Component', () => {
     const mockOnSelect = vi.fn();
     render(<CategoryFilter selectedCategory={undefined} onSelectCategory={mockOnSelect} />);
 
-    expect(screen.getByText(/All/i)).toBeDefined();
+    expect(screen.getByText(/Todas/i)).toBeDefined();
   });
 
   it('should render all categories', () => {

@@ -1,7 +1,20 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { ActivityCard } from '@/components/ActivityCard';
 import type { ActivityWithDetails } from '@/lib/types';
+
+// Mock useCategories hook
+vi.mock('@/hooks/useCategories', () => ({
+  useCategories: () => ({
+    categories: [
+      { id: 1, name: 'Productiva', color: '#3B82F6', icon: 'WORK' },
+      { id: 2, name: 'Ocio', color: '#8B5CF6', icon: 'FUN' },
+    ],
+    isLoading: false,
+    error: null,
+  }),
+}));
 
 describe('ActivityCard Component', () => {
   const mockActivity: ActivityWithDetails = {
@@ -38,8 +51,17 @@ describe('ActivityCard Component', () => {
     expect(screen.getByText('Test description')).toBeDefined();
   });
 
-  it('should display category badge', () => {
-    render(<ActivityCard activity={mockActivity} />);
+  it('should display category badge when expanded', async () => {
+    const user = userEvent.setup();
+    const { container } = render(<ActivityCard activity={mockActivity} />);
+
+    // Card is closed by default, need to open it by clicking the summary
+    const summary = container.querySelector('summary');
+    if (summary) {
+      await user.click(summary);
+    }
+
+    // Now category should be visible
     expect(screen.getByText('Productiva')).toBeDefined();
   });
 
@@ -50,7 +72,7 @@ describe('ActivityCard Component', () => {
 
   it('should show energy level', () => {
     render(<ActivityCard activity={mockActivity} />);
-    expect(screen.getByText(/Medium/i)).toBeDefined();
+    expect(screen.getByText(/Media/i)).toBeDefined();
   });
 
   it('should show location', () => {

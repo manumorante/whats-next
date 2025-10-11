@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Badge } from '@/components/Badge';
 import { useActiveContexts } from '@/hooks/useContexts';
 
 export function CurrentTimeInfo() {
@@ -38,14 +39,9 @@ export function CurrentTimeInfo() {
       {/* Active contexts */}
       {!isLoading && activeContexts.length > 0 && (
         <div className="flex flex-wrap gap-2 justify-end">
-          <span className="text-xs text-neutral-500">Active:</span>
+          <span className="text-xs text-neutral-500">Activo:</span>
           {activeContexts.map((context) => (
-            <span
-              key={context.id}
-              className="px-2 py-1 bg-green-500/10 text-green-400 text-xs rounded-full border border-green-500/20"
-            >
-              {context.label}
-            </span>
+            <Badge key={context.id}>{context.label}</Badge>
           ))}
         </div>
       )}

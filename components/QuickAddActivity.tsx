@@ -81,7 +81,7 @@ export function QuickAddActivity({ onAdd }: QuickAddActivityProps) {
         type="text"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        placeholder="Add new activity..."
+        placeholder="Añadir nueva actividad..."
         disabled={isAdding}
         className="w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-neutral-100 placeholder-neutral-500 focus:outline-none focus:border-neutral-700 transition-colors disabled:opacity-50"
       />
