@@ -45,9 +45,9 @@ export function ActivityCard({
   };
 
   const energyLabels = {
-    low: 'Baja',
-    medium: 'Media',
-    high: 'Alta',
+    low: 'Ligera',
+    medium: 'Moderada',
+    high: 'Intensa',
   };
 
   // Options for selects
@@ -58,9 +58,9 @@ export function ActivityCard({
   ];
 
   const energyOptions: SelectOption[] = [
-    { value: 'low', label: 'Baja' },
-    { value: 'medium', label: 'Media' },
-    { value: 'high', label: 'Alta' },
+    { value: 'low', label: 'Ligera' },
+    { value: 'medium', label: 'Moderada' },
+    { value: 'high', label: 'Intensa' },
   ];
 
   const categoryOptions: SelectOption[] = categories.map((cat) => ({

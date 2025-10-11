@@ -65,7 +65,7 @@ describe('ActivityCard Component', () => {
 
   it('should show energy level', () => {
     render(<ActivityCard activity={mockActivity} />);
-    expect(screen.getByText(/Media/i)).toBeDefined();
+    expect(screen.getByText(/Moderada/i)).toBeDefined();
   });
 
   it('should call onToggle when checkbox clicked', async () => {
