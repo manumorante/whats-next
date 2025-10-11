@@ -23,7 +23,6 @@ describe('ActivityCard Component', () => {
     description: 'Test description',
     category_id: 1,
     energy_level: 'medium',
-    location: 'home',
     priority: 'important',
     is_recurring: 0,
     recurrence_type: null,
@@ -67,11 +66,6 @@ describe('ActivityCard Component', () => {
   it('should show energy level', () => {
     render(<ActivityCard activity={mockActivity} />);
     expect(screen.getByText(/Media/i)).toBeDefined();
-  });
-
-  it('should show location', () => {
-    render(<ActivityCard activity={mockActivity} />);
-    expect(screen.getByText(/home/i)).toBeDefined();
   });
 
   it('should call onToggle when checkbox clicked', async () => {

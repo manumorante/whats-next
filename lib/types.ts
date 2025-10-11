@@ -40,7 +40,6 @@ export interface Activity {
   description: string | null;
   category_id: number | null;
   energy_level: EnergyLevel | null;
-  location: string | null;
   priority: Priority;
   is_recurring: number; // 0 or 1
   recurrence_type: RecurrenceType;
@@ -98,7 +97,6 @@ export interface CreateActivityRequest {
   description?: string;
   category_id?: number;
   energy_level?: EnergyLevel;
-  location?: string;
   priority?: Priority;
   is_recurring?: boolean;
   recurrence_type?: RecurrenceType;
@@ -122,5 +120,4 @@ export interface GetActivitiesFilters {
   energy_level?: EnergyLevel;
   is_completed?: boolean;
   is_recurring?: boolean;
-  location?: string;
 }

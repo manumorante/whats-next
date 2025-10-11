@@ -55,11 +55,6 @@ export async function getActivities(
     args.push(filters.is_recurring ? 1 : 0);
   }
 
-  if (filters?.location) {
-    conditions.push('a.location = ?');
-    args.push(filters.location);
-  }
-
   if (conditions.length > 0) {
     sql += ' WHERE ' + conditions.join(' AND ');
   }
@@ -77,7 +72,6 @@ export async function getActivities(
       description: row.description as string | null,
       category_id: row.category_id as number | null,
       energy_level: row.energy_level as string | null as ActivityWithDetails['energy_level'],
-      location: row.location as string | null,
       priority: row.priority as string as ActivityWithDetails['priority'],
       is_recurring: row.is_recurring as number,
       recurrence_type: row.recurrence_type as
@@ -157,15 +151,14 @@ export async function createActivity(data: CreateActivityRequest): Promise<numbe
     sql: `
       INSERT INTO activities (
         title, description, category_id,
-        energy_level, location, priority, is_recurring, recurrence_type
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        energy_level, priority, is_recurring, recurrence_type
+      ) VALUES (?, ?, ?, ?, ?, ?, ?)
     `,
     args: [
       data.title.trim(),
       data.description || null,
       data.category_id || null,
       data.energy_level || null,
-      data.location || null,
       data.priority || 'someday',
       data.is_recurring ? 1 : 0,
       data.recurrence_type || null,
@@ -225,11 +218,6 @@ export async function updateActivity(id: number, data: UpdateActivityRequest): P
   if (data.energy_level !== undefined) {
     fields.push('energy_level = ?');
     args.push(data.energy_level || null);
-  }
-
-  if (data.location !== undefined) {
-    fields.push('location = ?');
-    args.push(data.location || null);
   }
 
   if (data.priority !== undefined) {

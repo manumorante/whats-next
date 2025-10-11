@@ -190,14 +190,6 @@ export function ActivityCard({
               }
             />
 
-            {/* Location */}
-            <EditableInput
-              value={activity.location}
-              onSave={(value) => updateField('location', value)}
-              placeholder="Añadir ubicación"
-              inputClassName="w-24 px-2 py-0.5 bg-neutral-800 text-neutral-300 text-xs rounded focus:outline-none"
-            />
-
             {/* Recurring */}
             {isRecurring && <Badge>{activity.recurrence_type}</Badge>}
           </div>
