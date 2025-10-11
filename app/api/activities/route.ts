@@ -36,11 +36,6 @@ export async function GET(request: NextRequest) {
       filters.is_recurring = searchParams.get('is_recurring') === 'true';
     }
 
-    if (searchParams.has('location')) {
-      const location = searchParams.get('location');
-      if (location) filters.location = location;
-    }
-
     const activities = await getActivities(filters);
     return NextResponse.json(activities);
   } catch (error) {

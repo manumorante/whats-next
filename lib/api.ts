@@ -60,7 +60,6 @@ export const activitiesApi = {
       params.set('is_completed', filters.is_completed.toString());
     if (filters?.is_recurring !== undefined)
       params.set('is_recurring', filters.is_recurring.toString());
-    if (filters?.location) params.set('location', filters.location);
 
     const query = params.toString();
     return fetchApi<ActivityWithDetails[]>(`/activities${query ? `?${query}` : ''}`);
