@@ -29,10 +29,10 @@ export function ActivityCard({
     high: 'text-red-400 bg-red-500/10',
   };
 
-  const priorityEmojis = {
-    urgent: '🔥',
-    important: '⭐',
-    someday: '💭',
+  const priorityLabels = {
+    urgent: '[!]',
+    important: '[*]',
+    someday: '[-]',
   };
 
   return (
@@ -98,16 +98,17 @@ export function ActivityCard({
           {/* Title */}
           <h3
             className={cn(
-              'text-sm font-medium mb-1',
+              'text-lg font-medium mb-1',
               isCompleted ? 'text-neutral-500 line-through' : 'text-neutral-100'
             )}
           >
-            {priorityEmojis[activity.priority]} {activity.title}
+            <span className="text-neutral-500 mr-1">{priorityLabels[activity.priority]}</span>
+            {activity.title}
           </h3>
 
           {/* Description */}
           {activity.description && (
-            <p className="text-xs text-neutral-400 mb-2">{activity.description}</p>
+            <p className="text-base text-neutral-400 mb-2">{activity.description}</p>
           )}
 
           {/* Metadata */}
@@ -127,23 +128,23 @@ export function ActivityCard({
                   energyColors[activity.energy_level]
                 )}
               >
-                {activity.energy_level === 'low' && '🌙 Baja'}
-                {activity.energy_level === 'medium' && '⚡ Media'}
-                {activity.energy_level === 'high' && '💪 Alta'}
+                {activity.energy_level === 'low' && 'Low'}
+                {activity.energy_level === 'medium' && 'Medium'}
+                {activity.energy_level === 'high' && 'High'}
               </span>
             )}
 
             {/* Location */}
             {activity.location && (
               <span className="px-2 py-0.5 bg-neutral-800 text-neutral-300 text-xs rounded">
-                📍 {activity.location}
+                {activity.location}
               </span>
             )}
 
             {/* Recurring */}
             {isRecurring && (
               <span className="px-2 py-0.5 bg-purple-500/10 text-purple-400 text-xs rounded">
-                🔄 {activity.recurrence_type}
+                {activity.recurrence_type}
               </span>
             )}
           </div>

@@ -6,9 +6,9 @@ import { CategoryFilter } from '@/components/CategoryFilter';
 vi.mock('@/hooks/useCategories', () => ({
   useCategories: () => ({
     categories: [
-      { id: 1, name: 'Productiva', color: '#3B82F6', icon: '💼' },
-      { id: 2, name: 'Ocio', color: '#8B5CF6', icon: '🎮' },
-      { id: 3, name: 'Social', color: '#EC4899', icon: '👥' },
+      { id: 1, name: 'Productiva', color: '#3B82F6', icon: 'WORK' },
+      { id: 2, name: 'Ocio', color: '#8B5CF6', icon: 'FUN' },
+      { id: 3, name: 'Social', color: '#EC4899', icon: 'SOCIAL' },
     ],
     isLoading: false,
     error: null,
@@ -20,7 +20,7 @@ describe('CategoryFilter Component', () => {
     const mockOnSelect = vi.fn();
     render(<CategoryFilter selectedCategory={undefined} onSelectCategory={mockOnSelect} />);
 
-    expect(screen.getByText(/Todas/i)).toBeDefined();
+    expect(screen.getByText(/All/i)).toBeDefined();
   });
 
   it('should render all categories', () => {
@@ -36,9 +36,9 @@ describe('CategoryFilter Component', () => {
     const mockOnSelect = vi.fn();
     render(<CategoryFilter selectedCategory={undefined} onSelectCategory={mockOnSelect} />);
 
-    expect(screen.getByText('💼')).toBeDefined();
-    expect(screen.getByText('🎮')).toBeDefined();
-    expect(screen.getByText('👥')).toBeDefined();
+    expect(screen.getByText('WORK')).toBeDefined();
+    expect(screen.getByText('FUN')).toBeDefined();
+    expect(screen.getByText('SOCIAL')).toBeDefined();
   });
 
   it('should highlight selected category', () => {

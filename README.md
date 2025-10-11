@@ -1,10 +1,10 @@
-# What's Next? 🎯
+# What's Next?
 
 [![Tests](https://github.com/manumorante/whats-next/actions/workflows/test.yml/badge.svg)](https://github.com/manumorante/whats-next/actions/workflows/test.yml)
 
 An intelligent activity recommendation system that suggests the right tasks at the right time, based on your schedule, context, and preferences.
 
-## ✨ Features
+## Features
 
 - **Smart Suggestions**: Activities recommended based on current time, day of week, and active contexts
 - **Flexible Scheduling**: Define activities with specific time slots or flexible contexts (work hours, after work, weekends, etc.)
@@ -13,7 +13,7 @@ An intelligent activity recommendation system that suggests the right tasks at t
 - **Real-time Updates**: Auto-refresh every 5 minutes to adapt to your changing schedule
 - **Completion Tracking**: Monitor your progress and streaks for recurring activities
 
-## 🚀 Tech Stack
+## Tech Stack
 
 - **Framework**: Next.js 15 (App Router + Turbopack)
 - **Database**: Turso (SQLite at the edge)
@@ -21,7 +21,7 @@ An intelligent activity recommendation system that suggests the right tasks at t
 - **Styling**: Tailwind CSS
 - **Language**: TypeScript
 
-## 📦 Installation
+## Installation
 
 1. Clone the repository:
 ```bash
@@ -53,7 +53,7 @@ npm run dev
 
 Visit [http://localhost:3000](http://localhost:3000)
 
-## 🗄️ Database Schema
+## Database Schema
 
 - **activities**: Main activity data with title, description, category, priority, duration, energy level, etc.
 - **categories**: Activity categories (Productive, Leisure, Social, Wellness, Maintenance)
@@ -62,7 +62,7 @@ Visit [http://localhost:3000](http://localhost:3000)
 - **activity_contexts**: Many-to-many relationship between activities and contexts
 - **activity_completions**: Completion history for tracking and statistics
 
-## 🎯 How It Works
+## How It Works
 
 ### Scoring Algorithm
 
@@ -94,7 +94,7 @@ Activities are scored based on multiple factors:
    - Energy: low
    - Category: Leisure
 
-## 🛠️ Development
+## Development
 
 ### Available Scripts
 
@@ -147,7 +147,7 @@ npm run test:coverage # With coverage
 └── migrations/       # Database migrations
 ```
 
-## 📡 API Endpoints
+## API Endpoints
 
 ### Activities
 - `GET /api/activities` - List activities (with filters)
@@ -173,7 +173,7 @@ npm run test:coverage # With coverage
 ### Suggestions
 - `GET /api/suggestions?limit=10&category=X` - Get suggestions
 
-## 🎨 Customization
+## Customization
 
 ### Adding Custom Contexts
 
@@ -205,15 +205,15 @@ await createActivity({
 });
 ```
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-## 📝 License
+## License
 
 MIT License - feel free to use this project for personal or commercial purposes.
 
-## 🔮 Future Ideas
+## Future Ideas
 
 - [ ] Mobile app (React Native)
 - [ ] Push notifications for suggested activities
@@ -226,4 +226,4 @@ MIT License - feel free to use this project for personal or commercial purposes.
 
 ---
 
-Built with ❤️ using Next.js and Turso
+Built using Next.js and Turso

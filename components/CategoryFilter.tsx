@@ -34,7 +34,7 @@ export function CategoryFilter({ selectedCategory, onSelectCategory }: CategoryF
             : 'bg-neutral-900 text-neutral-400 hover:bg-neutral-800'
         )}
       >
-        ✨ Todas
+        All
       </button>
 
       {/* Category buttons */}

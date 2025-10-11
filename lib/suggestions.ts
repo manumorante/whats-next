@@ -84,9 +84,9 @@ export async function getSuggestedActivities(
     };
     score += priorityScores[activity.priority];
     if (activity.priority === 'urgent') {
-      reasons.push('⚠️ Urgente');
+      reasons.push('Urgent');
     } else if (activity.priority === 'important') {
-      reasons.push('⭐ Importante');
+      reasons.push('Important');
     }
 
     // Recurring activities that haven't been done today get bonus

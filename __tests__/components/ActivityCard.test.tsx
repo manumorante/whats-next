@@ -21,7 +21,7 @@ describe('ActivityCard Component', () => {
       id: 1,
       name: 'Productiva',
       color: '#3B82F6',
-      icon: '💼',
+      icon: 'WORK',
       created_at: new Date().toISOString(),
     },
     contexts: [],
@@ -41,7 +41,7 @@ describe('ActivityCard Component', () => {
   it('should display category badge', () => {
     render(<ActivityCard activity={mockActivity} />);
     expect(screen.getByText('Productiva')).toBeDefined();
-    expect(screen.getByText('💼')).toBeDefined();
+    expect(screen.getByText('WORK')).toBeDefined();
   });
 
   it('should show duration', () => {
@@ -51,7 +51,7 @@ describe('ActivityCard Component', () => {
 
   it('should show energy level', () => {
     render(<ActivityCard activity={mockActivity} />);
-    expect(screen.getByText(/Media/i)).toBeDefined();
+    expect(screen.getByText(/Medium/i)).toBeDefined();
   });
 
   it('should show location', () => {

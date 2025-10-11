@@ -86,11 +86,11 @@ CREATE TABLE IF NOT EXISTS activity_completions (
 -- 7. INSERT DEFAULT CATEGORIES
 -- ==================================================
 INSERT INTO categories (name, color, icon) VALUES
-  ('Productiva', '#3B82F6', '💼'),
-  ('Ocio', '#8B5CF6', '🎮'),
-  ('Social', '#EC4899', '👥'),
-  ('Bienestar', '#10B981', '🧘'),
-  ('Mantenimiento', '#F59E0B', '🏠');
+  ('Productiva', '#3B82F6', 'WORK'),
+  ('Ocio', '#8B5CF6', 'FUN'),
+  ('Social', '#EC4899', 'SOCIAL'),
+  ('Bienestar', '#10B981', 'HEALTH'),
+  ('Mantenimiento', '#F59E0B', 'HOME');
 
 -- ==================================================
 -- 8. INSERT DEFAULT CONTEXTS
