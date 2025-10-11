@@ -1,10 +1,10 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import type {
+  ActivityWithDetails,
+  DayOfWeek,
   EnergyLevel,
   Priority,
   RecurrenceType,
-  DayOfWeek,
-  ActivityWithDetails,
 } from '@/lib/types';
 
 describe('Type Definitions', () => {
@@ -73,4 +73,3 @@ describe('Type Definitions', () => {
     expect(minimalActivity.duration_minutes).toBeUndefined();
   });
 });
-

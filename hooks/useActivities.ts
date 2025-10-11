@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import useSWR from 'swr';
+import useSWR, { mutate as globalMutate } from 'swr';
 import { activitiesApi } from '@/lib/api';
 import type {
   CreateActivityRequest,
@@ -32,15 +32,48 @@ export function useActivities(filters?: GetActivitiesFilters) {
   };
 
   /**
-   * Update an existing activity
+   * Update an existing activity with optimistic update
    */
   const updateActivity = async (id: number, data: UpdateActivityRequest) => {
     setMutatingId(id);
     try {
+      // Optimistic update for activities cache
+      await mutate(
+        (currentData) => {
+          if (!currentData) return currentData;
+          return currentData.map((activity) => {
+            if (activity.id !== id) return activity;
+
+            // Only update simple fields, skip complex relations
+            const updated = { ...activity };
+            if (data.title !== undefined) updated.title = data.title;
+            if (data.description !== undefined) updated.description = data.description;
+            if (data.category_id !== undefined) updated.category_id = data.category_id;
+            if (data.priority !== undefined) updated.priority = data.priority;
+            if (data.energy_level !== undefined) updated.energy_level = data.energy_level;
+            if (data.duration_minutes !== undefined)
+              updated.duration_minutes = data.duration_minutes;
+            if (data.location !== undefined) updated.location = data.location;
+            if (data.is_recurring !== undefined) updated.is_recurring = data.is_recurring ? 1 : 0;
+            if (data.recurrence_type !== undefined) updated.recurrence_type = data.recurrence_type;
+
+            return updated;
+          });
+        },
+        { revalidate: false }
+      );
+
+      // Call API
       await activitiesApi.update(id, data);
-      await mutate(); // Revalidate to get server data
+
+      // Revalidate activities cache
+      await mutate();
+
+      // Also revalidate suggestions cache globally (they depend on activities)
+      await globalMutate((key) => Array.isArray(key) && key[0] === 'suggestions');
     } catch (error) {
       await mutate(); // Rollback on error
+      await globalMutate((key) => Array.isArray(key) && key[0] === 'suggestions');
       throw error;
     } finally {
       setMutatingId(null);

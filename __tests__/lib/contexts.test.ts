@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import type { ContextParsed } from '@/lib/types';
 
 describe('Context Time Logic', () => {
@@ -65,4 +65,3 @@ describe('Context Time Logic', () => {
     expect(validContext.time_end).toMatch(/^\d{2}:\d{2}$/);
   });
 });
-

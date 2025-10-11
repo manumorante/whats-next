@@ -3,10 +3,13 @@
 import { useState } from 'react';
 import { CategoryFilter } from '@/components/CategoryFilter';
 import { CurrentTimeInfo } from '@/components/CurrentTimeInfo';
+import { QuickAddActivity } from '@/components/QuickAddActivity';
 import { SuggestionsList } from '@/components/SuggestionsList';
+import { useActivities } from '@/hooks/useActivities';
 
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<number | undefined>(undefined);
+  const { createActivity } = useActivities();
 
   return (
     <div className="min-h-screen bg-neutral-950 p-4 md:p-8">
@@ -21,6 +24,16 @@ export default function Home() {
 
         {/* Current Time & Contexts */}
         <CurrentTimeInfo />
+
+        {/* Quick Add */}
+        <QuickAddActivity
+          onAdd={async (title, suggestedData) => {
+            await createActivity({
+              title,
+              ...suggestedData,
+            });
+          }}
+        />
 
         {/* Category Filter */}
         <div className="mb-6">

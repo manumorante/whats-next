@@ -1,6 +1,8 @@
 'use client';
 
-import type { ActivityWithDetails } from '@/lib/types';
+import { useState } from 'react';
+import { useCategories } from '@/hooks/useCategories';
+import type { ActivityWithDetails, UpdateActivityRequest } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
 interface ActivityCardProps {
@@ -9,6 +11,7 @@ interface ActivityCardProps {
   reason?: string;
   onComplete?: (id: number) => void;
   onToggle?: (id: number) => void;
+  onUpdate?: (id: number, data: UpdateActivityRequest) => Promise<void>;
   isMutating?: boolean;
 }
 
@@ -18,10 +21,15 @@ export function ActivityCard({
   reason,
   onComplete,
   onToggle,
+  onUpdate,
   isMutating = false,
 }: ActivityCardProps) {
   const isCompleted = activity.is_completed === 1;
   const isRecurring = activity.is_recurring === 1;
+  const { categories } = useCategories();
+
+  const [editingField, setEditingField] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState<string>('');
 
   const energyColors = {
     low: 'text-blue-400 bg-blue-500/10',
@@ -39,6 +47,37 @@ export function ActivityCard({
     urgent: 'bg-red-500/10 text-red-400 border-red-500/20',
     important: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
     someday: 'bg-neutral-700/50 text-neutral-400 border-neutral-600/20',
+  };
+
+  const startEditing = (field: string, currentValue: string) => {
+    setEditingField(field);
+    setEditValue(currentValue);
+  };
+
+  const cancelEditing = () => {
+    setEditingField(null);
+    setEditValue('');
+  };
+
+  const saveEdit = async (field: string, newValue: unknown, originalValue: unknown) => {
+    if (!onUpdate) {
+      cancelEditing();
+      return;
+    }
+
+    // Only update if value has changed
+    if (newValue === originalValue) {
+      cancelEditing();
+      return;
+    }
+
+    try {
+      await onUpdate(activity.id, { [field]: newValue });
+      cancelEditing();
+    } catch (error) {
+      console.error('Error updating field:', error);
+      cancelEditing();
+    }
   };
 
   return (
@@ -99,65 +138,218 @@ export function ActivityCard({
 
       {/* Category Badge */}
       {activity.category && (
-        <div
-          className="absolute top-3 right-3 px-2 py-1 rounded text-xs font-medium"
+        <button
+          type="button"
+          className="absolute top-3 right-3 px-2 py-1 rounded text-xs font-medium cursor-pointer hover:opacity-80"
           style={{
             backgroundColor: `${activity.category.color}20`,
             color: activity.category.color,
           }}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (editingField === 'category') {
+              cancelEditing();
+            } else {
+              startEditing('category', String(activity.category_id || ''));
+            }
+          }}
         >
-          {activity.category.name}
-        </div>
+          {editingField === 'category' ? (
+            <select
+              value={editValue}
+              onChange={(e) => {
+                const newValue = Number(e.target.value);
+                saveEdit('category_id', newValue, activity.category_id);
+              }}
+              onBlur={cancelEditing}
+              className="bg-neutral-800 text-neutral-100 text-xs rounded px-1 py-0.5 border-none focus:outline-none"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+          ) : (
+            activity.category.name
+          )}
+        </button>
       )}
 
-      {/* Expanded content */}
+      {/* Expanded content - Editable */}
       <div className="mt-3 ml-8">
-        {/* Description */}
-        {activity.description && (
-          <p className="text-sm text-neutral-400 mb-3">{activity.description}</p>
-        )}
+        {/* Title - Editable */}
+        <div className="mb-3">
+          {editingField === 'title' ? (
+            <input
+              type="text"
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onBlur={() => saveEdit('title', editValue, activity.title)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.currentTarget.blur();
+                } else if (e.key === 'Escape') {
+                  cancelEditing();
+                }
+              }}
+              className="w-full px-2 py-1 bg-neutral-800 border border-neutral-700 rounded text-base font-medium text-neutral-100 focus:outline-none focus:border-neutral-600"
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={() => startEditing('title', activity.title)}
+              className={cn(
+                'text-base font-medium cursor-pointer hover:text-neutral-300 transition-colors text-left w-full',
+                isCompleted ? 'text-neutral-500' : 'text-neutral-100'
+              )}
+            >
+              {activity.title}
+            </button>
+          )}
+        </div>
 
-        {/* Metadata */}
+        {/* Description - Editable */}
+        <div className="mb-3">
+          {editingField === 'description' ? (
+            <textarea
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onBlur={() => saveEdit('description', editValue || null, activity.description)}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                  cancelEditing();
+                }
+              }}
+              rows={2}
+              className="w-full px-2 py-1 bg-neutral-800 border border-neutral-700 rounded text-sm text-neutral-400 focus:outline-none focus:border-neutral-600 resize-none"
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={() => startEditing('description', activity.description || '')}
+              className="text-sm text-neutral-400 cursor-pointer hover:text-neutral-300 transition-colors text-left w-full"
+            >
+              {activity.description || 'Add description...'}
+            </button>
+          )}
+        </div>
+
+        {/* Metadata - Editable */}
         <div className="flex flex-wrap items-center gap-2 mb-2">
-          {/* Priority Badge */}
-          <span
-            className={cn(
-              'px-2 py-0.5 text-xs rounded font-medium border',
-              priorityColors[activity.priority]
-            )}
-          >
-            {priorityLabels[activity.priority]}
-          </span>
-
-          {/* Duration */}
-          {activity.duration_minutes && (
-            <span className="px-2 py-0.5 bg-neutral-800 text-neutral-300 text-xs rounded">
-              {activity.duration_minutes} min
-            </span>
+          {/* Priority - Editable */}
+          {editingField === 'priority' ? (
+            <select
+              value={editValue}
+              onChange={(e) => saveEdit('priority', e.target.value, activity.priority)}
+              onBlur={cancelEditing}
+              className="px-2 py-0.5 text-xs rounded font-medium border bg-neutral-800 text-neutral-100 focus:outline-none"
+            >
+              <option value="urgent">Must Do</option>
+              <option value="important">Should Do</option>
+              <option value="someday">Nice to Have</option>
+            </select>
+          ) : (
+            <button
+              type="button"
+              onClick={() => startEditing('priority', activity.priority)}
+              className={cn(
+                'px-2 py-0.5 text-xs rounded font-medium border cursor-pointer hover:opacity-80 transition-opacity',
+                priorityColors[activity.priority]
+              )}
+            >
+              {priorityLabels[activity.priority]}
+            </button>
           )}
 
-          {/* Energy Level */}
-          {activity.energy_level && (
-            <span
+          {/* Duration - Editable */}
+          {editingField === 'duration' ? (
+            <input
+              type="number"
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onBlur={() => {
+                const newValue = editValue ? Number(editValue) : null;
+                saveEdit('duration_minutes', newValue, activity.duration_minutes);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.currentTarget.blur();
+                } else if (e.key === 'Escape') {
+                  cancelEditing();
+                }
+              }}
+              min="1"
+              className="w-16 px-2 py-0.5 bg-neutral-800 text-neutral-300 text-xs rounded focus:outline-none"
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={() => startEditing('duration', String(activity.duration_minutes || ''))}
+              className="px-2 py-0.5 bg-neutral-800 text-neutral-300 text-xs rounded cursor-pointer hover:bg-neutral-700 transition-colors"
+            >
+              {activity.duration_minutes ? `${activity.duration_minutes} min` : 'Add duration'}
+            </button>
+          )}
+
+          {/* Energy Level - Editable */}
+          {editingField === 'energy' ? (
+            <select
+              value={editValue}
+              onChange={(e) => saveEdit('energy_level', e.target.value, activity.energy_level)}
+              onBlur={cancelEditing}
+              className="px-2 py-0.5 text-xs rounded font-medium bg-neutral-800 text-neutral-100 focus:outline-none"
+            >
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+          ) : (
+            <button
+              type="button"
+              onClick={() => startEditing('energy', activity.energy_level || 'medium')}
               className={cn(
-                'px-2 py-0.5 text-xs rounded font-medium',
-                energyColors[activity.energy_level]
+                'px-2 py-0.5 text-xs rounded font-medium cursor-pointer hover:opacity-80 transition-opacity',
+                activity.energy_level
+                  ? energyColors[activity.energy_level]
+                  : 'bg-neutral-800 text-neutral-400'
               )}
             >
               {activity.energy_level === 'low' && 'Low'}
               {activity.energy_level === 'medium' && 'Medium'}
               {activity.energy_level === 'high' && 'High'}
-            </span>
+              {!activity.energy_level && 'Add energy'}
+            </button>
           )}
 
-          {/* Location */}
-          {activity.location && (
-            <span className="px-2 py-0.5 bg-neutral-800 text-neutral-300 text-xs rounded">
-              {activity.location}
-            </span>
+          {/* Location - Editable */}
+          {editingField === 'location' ? (
+            <input
+              type="text"
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onBlur={() => saveEdit('location', editValue || null, activity.location)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.currentTarget.blur();
+                } else if (e.key === 'Escape') {
+                  cancelEditing();
+                }
+              }}
+              className="w-24 px-2 py-0.5 bg-neutral-800 text-neutral-300 text-xs rounded focus:outline-none"
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={() => startEditing('location', activity.location || '')}
+              className="px-2 py-0.5 bg-neutral-800 text-neutral-300 text-xs rounded cursor-pointer hover:bg-neutral-700 transition-colors"
+            >
+              {activity.location || 'Add location'}
+            </button>
           )}
 
-          {/* Recurring */}
+          {/* Recurring - Show only */}
           {isRecurring && (
             <span className="px-2 py-0.5 bg-purple-500/10 text-purple-400 text-xs rounded">
               {activity.recurrence_type}

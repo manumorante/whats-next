@@ -30,7 +30,7 @@ describe('ActivityCard Component', () => {
 
   it('should render activity title', () => {
     render(<ActivityCard activity={mockActivity} />);
-    expect(screen.getByText(/Test Activity/i)).toBeDefined();
+    expect(screen.getAllByText(/Test Activity/i).length).toBeGreaterThan(0);
   });
 
   it('should render activity description', () => {

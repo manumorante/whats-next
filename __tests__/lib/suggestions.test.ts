@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ActivityWithDetails, Priority } from '@/lib/types';
 
 // Mock the dependencies
@@ -43,8 +43,7 @@ describe('Suggestions Algorithm', () => {
     const recentCompletion = new Date(now.getTime() - 1 * 60 * 60 * 1000); // 1 hour ago
     const oldCompletion = new Date(now.getTime() - 24 * 60 * 60 * 1000); // 24 hours ago
 
-    const hoursSinceRecent =
-      (now.getTime() - recentCompletion.getTime()) / (1000 * 60 * 60);
+    const hoursSinceRecent = (now.getTime() - recentCompletion.getTime()) / (1000 * 60 * 60);
     const hoursSinceOld = (now.getTime() - oldCompletion.getTime()) / (1000 * 60 * 60);
 
     expect(hoursSinceRecent).toBeLessThan(2);
@@ -89,4 +88,3 @@ describe('Suggestions Algorithm', () => {
     expect(currentTime).toMatch(/^\d{2}:\d{2}$/);
   });
 });
-
