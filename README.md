@@ -1,5 +1,7 @@
 # What's Next? 🎯
 
+[![Tests](https://github.com/manumorante/whats-next/actions/workflows/test.yml/badge.svg)](https://github.com/manumorante/whats-next/actions/workflows/test.yml)
+
 An intelligent activity recommendation system that suggests the right tasks at the right time, based on your schedule, context, and preferences.
 
 ## ✨ Features
