@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Badge } from '@/components/Badge';
 
 interface EditableInputProps {
   value: string | number | null;
@@ -8,10 +9,9 @@ interface EditableInputProps {
   placeholder?: string;
   type?: 'text' | 'number';
   min?: number;
-  className?: string;
   displayFormatter?: (value: string | number | null) => string;
   inputClassName?: string;
-  buttonClassName?: string;
+  className?: string;
 }
 
 export function EditableInput({
@@ -20,10 +20,9 @@ export function EditableInput({
   placeholder = 'Añadir...',
   type = 'text',
   min,
-  className = '',
   displayFormatter,
   inputClassName = '',
-  buttonClassName = '',
+  className,
 }: EditableInputProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
@@ -83,21 +82,20 @@ export function EditableInput({
           }
         }}
         min={min}
-        className={inputClassName || className}
+        className={inputClassName}
       />
     );
   }
 
   return (
-    <button
-      type="button"
+    <Badge
       onClick={(e) => {
         e.stopPropagation();
         startEditing();
       }}
-      className={buttonClassName || className}
+      className={className}
     >
       {displayValue}
-    </button>
+    </Badge>
   );
 }

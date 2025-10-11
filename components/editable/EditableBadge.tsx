@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Badge } from '@/components/Badge';
 import type { SelectOption } from './EditableSelect';
 
 interface EditableBadgeProps {
@@ -8,79 +9,88 @@ interface EditableBadgeProps {
   options: SelectOption[];
   onSave: (value: string | number) => Promise<void>;
   displayFormatter: (value: string | number) => string;
-  badgeClassName: string;
-  selectClassName?: string;
-  style?: React.CSSProperties;
 }
 
-export function EditableBadge({
-  value,
-  options,
-  onSave,
-  displayFormatter,
-  badgeClassName,
-  selectClassName,
-  style,
-}: EditableBadgeProps) {
-  const [isEditing, setIsEditing] = useState(false);
+export function EditableBadge({ value, options, onSave, displayFormatter }: EditableBadgeProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   const displayValue = displayFormatter(value);
 
-  const startEditing = () => {
-    setIsEditing(true);
-  };
+  // Close on click outside
+  useEffect(() => {
+    if (!isOpen) return;
 
-  const cancelEditing = () => {
-    setIsEditing(false);
-  };
+    const handleClickOutside = (event: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
 
-  const handleChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newValue = e.target.value;
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isOpen]);
+
+  const handleSelect = async (selectedValue: string | number) => {
     const originalValue = String(value);
+    const newValueStr = String(selectedValue);
 
     // Only save if changed
-    if (newValue === originalValue) {
-      cancelEditing();
+    if (newValueStr === originalValue) {
+      setIsOpen(false);
       return;
     }
 
     try {
       // Convert to number if original value was a number
-      const finalValue = typeof value === 'number' ? Number(newValue) : newValue;
+      const finalValue = typeof value === 'number' ? Number(selectedValue) : selectedValue;
       await onSave(finalValue);
-      cancelEditing();
+      setIsOpen(false);
     } catch (error) {
       console.error('Error saving:', error);
-      cancelEditing();
+      setIsOpen(false);
     }
   };
 
-  if (isEditing) {
-    return (
-      <select
-        value={value}
-        onChange={handleChange}
-        onBlur={cancelEditing}
-        onKeyDown={(e) => {
-          if (e.key === 'Escape') {
-            cancelEditing();
-          }
-        }}
-        className={selectClassName || badgeClassName}
-        style={style}
-      >
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-    );
-  }
-
   return (
-    <button type="button" onClick={startEditing} className={badgeClassName} style={style}>
-      {displayValue}
-    </button>
+    <div ref={wrapperRef} className="relative inline-block">
+      {/* Current badge */}
+      <Badge
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsOpen(!isOpen);
+        }}
+      >
+        {displayValue}
+      </Badge>
+
+      {/* Dropdown with other badges */}
+      {isOpen && (
+        <div className="absolute top-full left-0 mt-1 z-50 bg-neutral-900 border border-neutral-700 rounded shadow-lg py-1 min-w-max flex flex-col gap-1">
+          {options.map((option) => (
+            <Badge
+              key={option.value}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleSelect(option.value);
+              }}
+            >
+              {option.label}
+            </Badge>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 interface BadgeProps {
   children: React.ReactNode;
   className?: string;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent) => void;
 }
 
 export function Badge({ children, className, onClick }: BadgeProps) {

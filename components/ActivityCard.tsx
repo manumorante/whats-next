@@ -88,14 +88,14 @@ export function ActivityCard({
     >
       <summary className="list-none flex items-center justify-between gap-3 [&::-webkit-details-marker]:hidden">
         {/* Title - Editable only when open */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0" key={isOpen ? 'open' : 'closed'}>
           {isOpen ? (
             <EditableInput
               value={activity.title}
               onSave={(value) => updateField('title', value)}
               placeholder="Sin título"
               inputClassName="w-full px-2 py-1 bg-neutral-800 border border-neutral-700 rounded text-base font-medium text-neutral-100 focus:outline-none focus:border-neutral-600"
-              buttonClassName={cn(
+              className={cn(
                 'inline-block text-left text-base font-medium cursor-pointer hover:text-neutral-300 transition-colors',
                 isCompleted ? 'text-neutral-500 line-through' : 'text-neutral-100'
               )}
@@ -144,7 +144,7 @@ export function ActivityCard({
       </summary>
 
       {/* Expanded content - Editable */}
-      <div className="mt-3">
+      <div className="mt-3" key={isOpen ? 'open' : 'closed'}>
         {/* Description - Editable */}
         <EditableTextarea
           value={activity.description}
@@ -169,8 +169,6 @@ export function ActivityCard({
                   const cat = categories.find((c) => c.id === value);
                   return cat?.name || '';
                 }}
-                badgeClassName="px-2 py-0.5 rounded text-xs font-medium bg-neutral-800 text-neutral-300 cursor-pointer hover:bg-neutral-700 transition-colors"
-                selectClassName="px-2 py-0.5 text-xs rounded font-medium bg-neutral-800 text-neutral-100 focus:outline-none"
               />
             )}
 
@@ -180,8 +178,6 @@ export function ActivityCard({
               options={priorityOptions}
               onSave={(value) => updateField('priority', value)}
               displayFormatter={(value) => priorityLabels[value as keyof typeof priorityLabels]}
-              badgeClassName="px-2 py-0.5 text-xs rounded font-medium bg-neutral-800 text-neutral-300 cursor-pointer hover:bg-neutral-700 transition-colors"
-              selectClassName="px-2 py-0.5 text-xs rounded font-medium bg-neutral-800 text-neutral-100 focus:outline-none"
             />
 
             {/* Duration */}
@@ -193,7 +189,6 @@ export function ActivityCard({
               min={1}
               displayFormatter={(value) => (value ? `${value} min` : 'Añadir duración')}
               inputClassName="w-16 px-2 py-0.5 bg-neutral-800 text-neutral-300 text-xs rounded focus:outline-none"
-              buttonClassName="px-2 py-0.5 bg-neutral-800 text-neutral-300 text-xs rounded cursor-pointer hover:bg-neutral-700 transition-colors"
             />
 
             {/* Energy Level */}
@@ -204,8 +199,6 @@ export function ActivityCard({
               displayFormatter={(value) =>
                 energyLabels[value as keyof typeof energyLabels] || 'Añadir energía'
               }
-              badgeClassName="px-2 py-0.5 text-xs rounded font-medium bg-neutral-800 text-neutral-300 cursor-pointer hover:bg-neutral-700 transition-colors"
-              selectClassName="px-2 py-0.5 text-xs rounded font-medium bg-neutral-800 text-neutral-100 focus:outline-none"
             />
 
             {/* Location */}
@@ -214,7 +207,6 @@ export function ActivityCard({
               onSave={(value) => updateField('location', value)}
               placeholder="Añadir ubicación"
               inputClassName="w-24 px-2 py-0.5 bg-neutral-800 text-neutral-300 text-xs rounded focus:outline-none"
-              buttonClassName="px-2 py-0.5 bg-neutral-800 text-neutral-300 text-xs rounded cursor-pointer hover:bg-neutral-700 transition-colors"
             />
 
             {/* Recurring */}
