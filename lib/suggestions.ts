@@ -84,9 +84,9 @@ export async function getSuggestedActivities(
     };
     score += priorityScores[activity.priority];
     if (activity.priority === 'urgent') {
-      reasons.push('Urgent');
+      reasons.push('Must Do');
     } else if (activity.priority === 'important') {
-      reasons.push('Important');
+      reasons.push('Should Do');
     }
 
     // Recurring activities that haven't been done today get bonus

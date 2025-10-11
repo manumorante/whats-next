@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 import { CategoryFilter } from '@/components/CategoryFilter';
 
 // Mock the useCategories hook
@@ -32,15 +32,6 @@ describe('CategoryFilter Component', () => {
     expect(screen.getByText('Social')).toBeDefined();
   });
 
-  it('should render category icons', () => {
-    const mockOnSelect = vi.fn();
-    render(<CategoryFilter selectedCategory={undefined} onSelectCategory={mockOnSelect} />);
-
-    expect(screen.getByText('WORK')).toBeDefined();
-    expect(screen.getByText('FUN')).toBeDefined();
-    expect(screen.getByText('SOCIAL')).toBeDefined();
-  });
-
   it('should highlight selected category', () => {
     const mockOnSelect = vi.fn();
     const { container } = render(
@@ -51,4 +42,3 @@ describe('CategoryFilter Component', () => {
     expect(buttons.length).toBeGreaterThan(0);
   });
 });
-

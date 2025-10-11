@@ -44,7 +44,7 @@ export function CategoryFilter({ selectedCategory, onSelectCategory }: CategoryF
           type="button"
           onClick={() => onSelectCategory(category.id)}
           className={cn(
-            'px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1.5',
+            'px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-colors',
             selectedCategory === category.id
               ? 'text-neutral-100'
               : 'bg-neutral-900 text-neutral-400 hover:bg-neutral-800'
@@ -53,8 +53,7 @@ export function CategoryFilter({ selectedCategory, onSelectCategory }: CategoryF
             backgroundColor: selectedCategory === category.id ? category.color : undefined,
           }}
         >
-          {category.icon && <span>{category.icon}</span>}
-          <span>{category.name}</span>
+          {category.name}
         </button>
       ))}
     </div>

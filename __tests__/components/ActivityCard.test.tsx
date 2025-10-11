@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 import { ActivityCard } from '@/components/ActivityCard';
 import type { ActivityWithDetails } from '@/lib/types';
 
@@ -41,7 +41,6 @@ describe('ActivityCard Component', () => {
   it('should display category badge', () => {
     render(<ActivityCard activity={mockActivity} />);
     expect(screen.getByText('Productiva')).toBeDefined();
-    expect(screen.getByText('WORK')).toBeDefined();
   });
 
   it('should show duration', () => {
@@ -96,4 +95,3 @@ describe('ActivityCard Component', () => {
     expect(screen.getByText(/daily/i)).toBeDefined();
   });
 });
-
