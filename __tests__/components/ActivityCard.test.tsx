@@ -44,11 +44,6 @@ describe('ActivityCard Component', () => {
     expect(screen.getAllByText(/Test Activity/i).length).toBeGreaterThan(0);
   });
 
-  it('should render activity description', () => {
-    render(<ActivityCard activity={mockActivity} />);
-    expect(screen.getByText('Test description')).toBeDefined();
-  });
-
   it('should display category badge when expanded', async () => {
     const user = userEvent.setup();
     const { container } = render(<ActivityCard activity={mockActivity} />);

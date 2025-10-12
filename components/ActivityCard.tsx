@@ -139,16 +139,6 @@ export function ActivityCard({
 
       {/* Expanded content - Editable */}
       <div className="mt-3" key={isOpen ? 'open' : 'closed'}>
-        {/* Description - Editable */}
-        <EditableInput
-          type="textarea"
-          value={activity.description}
-          onSave={(value) => updateField('description', value)}
-          placeholder="Añadir descripción..."
-          rows={2}
-          className="mb-3"
-        />
-
         <div className="flex justify-between items-center">
           {/* Metadata - Editable */}
           <div className="flex flex-wrap items-center gap-2 mb-2">
