@@ -1,4 +1,4 @@
 export { EditableBadge } from './EditableBadge';
+export { EditableContexts } from './EditableContexts';
 export { EditableInput } from './EditableInput';
-export type { SelectOption } from './EditableSelect';
-export { EditableSelect } from './EditableSelect';
+export type { SelectOption } from './types';

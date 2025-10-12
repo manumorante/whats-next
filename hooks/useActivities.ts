@@ -47,9 +47,6 @@ export function useActivities(filters?: GetActivitiesFilters) {
             if (data.category_id !== undefined) updated.category_id = data.category_id ?? null;
             if (data.priority !== undefined) updated.priority = data.priority;
             if (data.energy_level !== undefined) updated.energy_level = data.energy_level ?? null;
-            if (data.is_recurring !== undefined) updated.is_recurring = data.is_recurring ? 1 : 0;
-            if (data.recurrence_type !== undefined)
-              updated.recurrence_type = data.recurrence_type ?? null;
 
             return updated;
           });
@@ -125,19 +122,6 @@ export function useActivities(filters?: GetActivitiesFilters) {
     }
   };
 
-  /**
-   * Mark recurring activity as completed
-   */
-  const completeActivity = async (id: number, notes?: string) => {
-    setMutatingId(id);
-    try {
-      await activitiesApi.complete(id, notes);
-      await mutate(); // Revalidate to update completion count
-    } finally {
-      setMutatingId(null);
-    }
-  };
-
   return {
     activities: data ?? [],
     isLoading,
@@ -147,7 +131,6 @@ export function useActivities(filters?: GetActivitiesFilters) {
     updateActivity,
     deleteActivity,
     toggleActivity,
-    completeActivity,
     reload: () => mutate(),
   };
 }

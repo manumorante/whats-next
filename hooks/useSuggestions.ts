@@ -12,7 +12,7 @@ export function useSuggestions(limit = 10, category?: number) {
     cacheKey,
     () => suggestionsApi.get(limit, category),
     {
-      refreshInterval: 300000, // Refresh every 5 minutes
+      refreshInterval: 30000, // Refresh every 30 seconds
       revalidateOnFocus: true, // Revalidate when window gets focus
     }
   );

@@ -47,14 +47,12 @@ describe('Type Definitions', () => {
       title: 'Test Activity',
       priority: 'important',
       energy_level: 'medium',
-      is_recurring: 0,
       is_completed: 0,
     };
 
     expect(activity.id).toBeDefined();
     expect(activity.title).toBeDefined();
     expect(activity.priority).toBeDefined();
-    expect(activity.is_recurring).toBeTypeOf('number');
     expect(activity.is_completed).toBeTypeOf('number');
   });
 
@@ -63,7 +61,6 @@ describe('Type Definitions', () => {
       id: 1,
       title: 'Minimal',
       priority: 'someday',
-      is_recurring: 0,
       is_completed: 0,
       created_at: new Date().toISOString(),
     };

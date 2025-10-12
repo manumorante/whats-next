@@ -40,8 +40,6 @@ CREATE TABLE IF NOT EXISTS activities (
   energy_level TEXT CHECK(energy_level IN ('low', 'medium', 'high')),
   location TEXT,
   priority TEXT CHECK(priority IN ('urgent', 'important', 'someday')) DEFAULT 'someday',
-  is_recurring INTEGER DEFAULT 0,
-  recurrence_type TEXT CHECK(recurrence_type IN ('daily', 'weekly', 'monthly', NULL)),
   is_completed INTEGER DEFAULT 0,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
@@ -103,7 +101,7 @@ INSERT INTO contexts (name, label, days, time_start, time_end) VALUES
   ('weekend_morning', 'Fin de semana mañana', '["Sat","Sun"]', '08:00', '14:00'),
   ('weekend_afternoon', 'Fin de semana tarde', '["Sat","Sun"]', '14:00', '20:00'),
   ('weekend_evening', 'Fin de semana noche', '["Sat","Sun"]', '20:00', '23:59'),
-  ('late_night', 'Noche', '["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]', '23:00', '02:00'),
+  ('late_night', 'Noche', '["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]', '23:00', '06:00'),
   ('anytime', 'Cualquier momento', '["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]', '00:00', '23:59');
 
 -- ==================================================
@@ -111,8 +109,8 @@ INSERT INTO contexts (name, label, days, time_start, time_end) VALUES
 -- ==================================================
 
 -- Ejemplo 1: Ir al cine (Ocio, fin de semana o después del trabajo)
-INSERT INTO activities (title, description, category_id, duration_minutes, energy_level, location, priority, is_recurring, recurrence_type)
-VALUES ('Ir al cine', 'Ver una película en el cine', 2, 150, 'medium', 'outdoor', 'someday', 0, NULL);
+INSERT INTO activities (title, description, category_id, duration_minutes, energy_level, location, priority)
+VALUES ('Ir al cine', 'Ver una película en el cine', 2, 150, 'medium', 'outdoor', 'someday');
 
 INSERT INTO activity_contexts (activity_id, context_id) VALUES
   (1, 4), -- after_work
@@ -120,9 +118,9 @@ INSERT INTO activity_contexts (activity_id, context_id) VALUES
   (1, 6), -- weekend_afternoon
   (1, 7); -- weekend_evening
 
--- Ejemplo 2: Ejercicio en el gimnasio (Bienestar, recurrente)
-INSERT INTO activities (title, description, category_id, duration_minutes, energy_level, location, priority, is_recurring, recurrence_type)
-VALUES ('Gimnasio', 'Sesión de entrenamiento', 4, 60, 'high', 'gym', 'important', 1, 'daily');
+-- Ejemplo 2: Ejercicio en el gimnasio (Bienestar)
+INSERT INTO activities (title, description, category_id, duration_minutes, energy_level, location, priority)
+VALUES ('Gimnasio', 'Sesión de entrenamiento', 4, 60, 'high', 'gym', 'important');
 
 INSERT INTO activity_contexts (activity_id, context_id) VALUES
   (2, 3), -- lunch_break
@@ -130,8 +128,8 @@ INSERT INTO activity_contexts (activity_id, context_id) VALUES
   (2, 5); -- weekend_morning
 
 -- Ejemplo 3: Videollamada de trabajo (Productiva, horario específico)
-INSERT INTO activities (title, description, category_id, duration_minutes, energy_level, location, priority, is_recurring, recurrence_type)
-VALUES ('Reunión de equipo', 'Daily standup meeting', 1, 30, 'medium', 'office', 'important', 1, 'daily');
+INSERT INTO activities (title, description, category_id, duration_minutes, energy_level, location, priority)
+VALUES ('Reunión de equipo', 'Daily standup meeting', 1, 30, 'medium', 'office', 'important');
 
 INSERT INTO activity_time_slots (activity_id, day_of_week, time_start, time_end) VALUES
   (3, 'Mon', '10:00', '10:30'),
@@ -141,8 +139,8 @@ INSERT INTO activity_time_slots (activity_id, day_of_week, time_start, time_end)
   (3, 'Fri', '10:00', '10:30');
 
 -- Ejemplo 4: Leer un libro (Ocio, flexible)
-INSERT INTO activities (title, description, category_id, duration_minutes, energy_level, location, priority, is_recurring, recurrence_type)
-VALUES ('Leer un libro', 'Lectura personal', 2, 30, 'low', 'home', 'someday', 1, 'daily');
+INSERT INTO activities (title, description, category_id, duration_minutes, energy_level, location, priority)
+VALUES ('Leer un libro', 'Lectura personal', 2, 30, 'low', 'home', 'someday');
 
 INSERT INTO activity_contexts (activity_id, context_id) VALUES
   (4, 4), -- after_work

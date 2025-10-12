@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 interface EditableInputProps {
@@ -9,7 +9,8 @@ interface EditableInputProps {
   placeholder?: string;
   type?: 'text' | 'number';
   min?: number;
-  editable?: boolean;
+  isEditMode?: boolean;
+  onEditComplete?: () => void;
   className?: string;
 }
 
@@ -19,24 +20,24 @@ export function EditableInput({
   placeholder = 'Añadir...',
   type = 'text',
   min,
-  editable = true,
+  isEditMode = false,
+  onEditComplete,
   className = '',
 }: EditableInputProps) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editValue, setEditValue] = useState('');
+  const [editValue, setEditValue] = useState(value?.toString() || '');
+  const previousEditModeRef = useRef(isEditMode);
 
-  const startEditing = () => {
-    if (!editable) return;
-    setIsEditing(true);
-    setEditValue(value?.toString() || '');
-  };
+  // Sync editValue with value when entering edit mode
+  useEffect(() => {
+    if (isEditMode && !previousEditModeRef.current) {
+      setEditValue(value?.toString() || '');
+    }
+    previousEditModeRef.current = isEditMode;
+  }, [isEditMode, value]);
 
-  const cancelEditing = () => {
-    setIsEditing(false);
-    setEditValue('');
-  };
+  const handleBlur = async () => {
+    if (!isEditMode) return;
 
-  const handleSave = async () => {
     const originalValue = value;
     let newValue: string | number | null = editValue;
 
@@ -49,42 +50,41 @@ export function EditableInput({
 
     // Only save if changed
     if (newValue === originalValue) {
-      cancelEditing();
       return;
     }
 
     try {
       await onSave(newValue);
-      cancelEditing();
     } catch (error) {
       console.error('Error saving:', error);
-      cancelEditing();
+      // Reset to original value on error
+      setEditValue(value?.toString() || '');
     }
   };
 
   return (
     <input
       type={type}
-      value={isEditing ? editValue : value || ''}
+      value={editValue}
       onChange={(e) => setEditValue(e.target.value)}
-      onFocus={startEditing}
-      onBlur={handleSave}
+      onBlur={handleBlur}
       onKeyDown={(e) => {
         if (e.key === 'Enter') {
+          onEditComplete?.();
           e.currentTarget.blur();
         } else if (e.key === 'Escape') {
-          cancelEditing();
+          setEditValue(value?.toString() || '');
+          onEditComplete?.();
         }
       }}
       min={min}
       placeholder={placeholder}
-      readOnly={!isEditing}
+      readOnly={!isEditMode}
       className={cn(
-        'bg-transparent border-0 p-0 text-neutral-300',
-        editable && !isEditing && 'cursor-pointer hover:text-neutral-100',
-        !editable && 'pointer-events-none',
-        isEditing &&
-          'px-2 py-1 bg-neutral-800 border border-neutral-700 rounded focus:outline-none focus:border-neutral-600',
+        'px-2 py-1 text-neutral-300',
+        isEditMode
+          ? 'bg-neutral-800 border border-neutral-700 rounded focus:outline-none focus:border-neutral-600'
+          : 'bg-transparent border border-transparent pointer-events-none',
         className
       )}
     />

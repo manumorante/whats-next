@@ -8,7 +8,7 @@ An intelligent activity recommendation system that suggests the right tasks at t
 
 - **Smart Suggestions**: Activities recommended based on current time, day of week, and active contexts
 - **Flexible Scheduling**: Define activities with specific time slots or flexible contexts (work hours, after work, weekends, etc.)
-- **Intelligent Scoring**: Algorithm considers priority, energy level, recurrence, and completion history
+- **Intelligent Scoring**: Algorithm considers priority, energy level, and completion history
 - **Categories**: Organize activities into Productive, Leisure, Social, Wellness, and Maintenance
 - **Real-time Updates**: Auto-refresh every 5 minutes to adapt to your changing schedule
 - **Completion Tracking**: Monitor your progress and streaks for recurring activities
@@ -199,9 +199,7 @@ await createActivity({
   duration_minutes: 30,
   energy_level: 'high',
   priority: 'important',
-  contexts: [5],         // weekend_morning
-  is_recurring: true,
-  recurrence_type: 'daily'
+  contexts: [5]         // weekend_morning
 });
 ```
 

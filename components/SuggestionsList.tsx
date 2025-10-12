@@ -12,7 +12,7 @@ interface SuggestionsListProps {
 
 export function SuggestionsList({ limit = 10, category }: SuggestionsListProps) {
   const { suggestions, isLoading, error, reload } = useSuggestions(limit, category);
-  const { completeActivity, toggleActivity, updateActivity, mutatingId } = useActivities();
+  const { toggleActivity, updateActivity, mutatingId } = useActivities();
 
   if (isLoading) {
     return <Loading />;
@@ -54,7 +54,6 @@ export function SuggestionsList({ limit = 10, category }: SuggestionsListProps) 
           activity={suggestion.activity}
           score={suggestion.score}
           reason={suggestion.reason}
-          onComplete={completeActivity}
           onToggle={toggleActivity}
           onUpdate={updateActivity}
           isMutating={mutatingId === suggestion.activity.id}

@@ -16,6 +16,7 @@ export function Badge({ children, className, onClick }: BadgeProps) {
       className={cn(
         'inline-flex items-center px-2 py-0.5 text-xs rounded font-medium',
         'bg-neutral-800 text-neutral-300',
+        !onClick && 'cursor-default',
         onClick && 'cursor-pointer hover:bg-neutral-700 transition-colors',
         className
       )}

@@ -2,20 +2,34 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Badge } from '@/components/Badge';
-import type { SelectOption } from './EditableSelect';
+import type { SelectOption } from './types';
 
 interface EditableBadgeProps {
   value: string | number;
   options: SelectOption[];
   onSave: (value: string | number) => Promise<void>;
   displayFormatter: (value: string | number) => string;
+  isEditMode?: boolean;
+  onEditComplete?: () => void;
 }
 
-export function EditableBadge({ value, options, onSave, displayFormatter }: EditableBadgeProps) {
+export function EditableBadge({
+  value,
+  options,
+  onSave,
+  displayFormatter,
+  isEditMode = false,
+  onEditComplete,
+}: EditableBadgeProps) {
   const [isOpen, setIsOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const displayValue = displayFormatter(value);
+
+  const handleClick = () => {
+    if (!isEditMode) return;
+    setIsOpen(!isOpen);
+  };
 
   // Close on click outside
   useEffect(() => {
@@ -30,6 +44,7 @@ export function EditableBadge({ value, options, onSave, displayFormatter }: Edit
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setIsOpen(false);
+        onEditComplete?.();
       }
     };
 
@@ -40,7 +55,7 @@ export function EditableBadge({ value, options, onSave, displayFormatter }: Edit
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [isOpen]);
+  }, [isOpen, onEditComplete]);
 
   const handleSelect = async (selectedValue: string | number) => {
     const originalValue = String(value);
@@ -55,8 +70,9 @@ export function EditableBadge({ value, options, onSave, displayFormatter }: Edit
     try {
       // Convert to number if original value was a number
       const finalValue = typeof value === 'number' ? Number(selectedValue) : selectedValue;
-      await onSave(finalValue);
       setIsOpen(false);
+      onEditComplete?.();
+      await onSave(finalValue);
     } catch (error) {
       console.error('Error saving:', error);
       setIsOpen(false);
@@ -67,10 +83,12 @@ export function EditableBadge({ value, options, onSave, displayFormatter }: Edit
     <div ref={wrapperRef} className="relative inline-block">
       {/* Current badge */}
       <Badge
-        onClick={(e) => {
-          e.stopPropagation();
-          setIsOpen(!isOpen);
-        }}
+        {...(isEditMode && {
+          onClick: (e) => {
+            e.stopPropagation();
+            handleClick();
+          },
+        })}
       >
         {displayValue}
       </Badge>

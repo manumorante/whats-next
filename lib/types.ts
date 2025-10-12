@@ -31,7 +31,6 @@ export interface ContextParsed extends Omit<Context, 'days'> {
 // ==================================================
 export type EnergyLevel = 'low' | 'medium' | 'high';
 export type Priority = 'urgent' | 'important' | 'someday';
-export type RecurrenceType = 'daily' | 'weekly' | 'monthly' | null;
 export type DayOfWeek = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun';
 
 export interface Activity {
@@ -41,8 +40,6 @@ export interface Activity {
   category_id: number | null;
   energy_level: EnergyLevel | null;
   priority: Priority;
-  is_recurring: number; // 0 or 1
-  recurrence_type: RecurrenceType;
   is_completed: number; // 0 or 1
   created_at: string;
 }
@@ -98,8 +95,6 @@ export interface CreateActivityRequest {
   category_id?: number;
   energy_level?: EnergyLevel;
   priority?: Priority;
-  is_recurring?: boolean;
-  recurrence_type?: RecurrenceType;
   contexts?: number[]; // Array of context IDs
   time_slots?: Omit<ActivityTimeSlot, 'id' | 'activity_id'>[];
 }
@@ -110,9 +105,9 @@ export interface UpdateActivityRequest {
   category_id?: number | null;
   energy_level?: EnergyLevel | null;
   priority?: Priority;
-  is_recurring?: boolean;
-  recurrence_type?: RecurrenceType | null;
   is_completed?: boolean;
+  contexts?: number[]; // Array of context IDs
+  time_slots?: Omit<ActivityTimeSlot, 'id' | 'activity_id'>[];
 }
 
 export interface ActivitySuggestion {
@@ -126,5 +121,4 @@ export interface GetActivitiesFilters {
   priority?: Priority;
   energy_level?: EnergyLevel;
   is_completed?: boolean;
-  is_recurring?: boolean;
 }

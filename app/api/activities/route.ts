@@ -32,10 +32,6 @@ export async function GET(request: NextRequest) {
       filters.is_completed = searchParams.get('is_completed') === 'true';
     }
 
-    if (searchParams.has('is_recurring')) {
-      filters.is_recurring = searchParams.get('is_recurring') === 'true';
-    }
-
     const activities = await getActivities(filters);
     return NextResponse.json(activities);
   } catch (error) {

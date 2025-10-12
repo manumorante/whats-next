@@ -59,8 +59,15 @@ export async function getSuggestedActivities(
         // Check day
         const dayMatches = !slot.day_of_week || slot.day_of_week === currentDayName;
 
-        // Check time
-        const timeMatches = currentTime >= slot.time_start && currentTime <= slot.time_end;
+        // Check time - handle ranges that cross midnight
+        let timeMatches: boolean;
+        if (slot.time_end < slot.time_start) {
+          // Range crosses midnight: active if after start OR before end
+          timeMatches = currentTime >= slot.time_start || currentTime <= slot.time_end;
+        } else {
+          // Normal range: active if between start and end
+          timeMatches = currentTime >= slot.time_start && currentTime <= slot.time_end;
+        }
 
         if (dayMatches && timeMatches) {
           matchesTimeSlot = true;
@@ -87,17 +94,6 @@ export async function getSuggestedActivities(
       reasons.push('Must Do');
     } else if (activity.priority === 'important') {
       reasons.push('Should Do');
-    }
-
-    // Recurring activities that haven't been done today get bonus
-    if (activity.is_recurring && activity.recurrence_type === 'daily') {
-      const lastCompleted = activity.last_completed ? new Date(activity.last_completed) : null;
-      const today = new Date().toDateString();
-
-      if (!lastCompleted || lastCompleted.toDateString() !== today) {
-        score += 20;
-        reasons.push('Pendiente hoy');
-      }
     }
 
     // Energy level consideration (based on time of day)

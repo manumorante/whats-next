@@ -58,8 +58,6 @@ export const activitiesApi = {
     if (filters?.energy_level) params.set('energy_level', filters.energy_level);
     if (filters?.is_completed !== undefined)
       params.set('is_completed', filters.is_completed.toString());
-    if (filters?.is_recurring !== undefined)
-      params.set('is_recurring', filters.is_recurring.toString());
 
     const query = params.toString();
     return fetchApi<ActivityWithDetails[]>(`/activities${query ? `?${query}` : ''}`);
@@ -100,16 +98,6 @@ export const activitiesApi = {
   toggle: async (id: number): Promise<{ success: boolean }> => {
     return fetchApi<{ success: boolean }>(`/activities/${id}/toggle`, {
       method: 'POST',
-    });
-  },
-
-  /**
-   * Mark recurring activity as completed (adds to completions history)
-   */
-  complete: async (id: number, notes?: string): Promise<{ success: boolean }> => {
-    return fetchApi<{ success: boolean }>(`/activities/${id}/complete`, {
-      method: 'POST',
-      body: JSON.stringify({ notes }),
     });
   },
 };

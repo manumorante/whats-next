@@ -24,8 +24,6 @@ describe('ActivityCard Component', () => {
     category_id: 1,
     energy_level: 'medium',
     priority: 'important',
-    is_recurring: 0,
-    recurrence_type: null,
     is_completed: 0,
     created_at: new Date().toISOString(),
     category: {
@@ -76,16 +74,5 @@ describe('ActivityCard Component', () => {
 
     expect(screen.getByText('Test reason')).toBeDefined();
     expect(screen.getByText('75pts')).toBeDefined();
-  });
-
-  it('should render recurring badge for recurring activities', () => {
-    const recurringActivity: ActivityWithDetails = {
-      ...mockActivity,
-      is_recurring: 1,
-      recurrence_type: 'daily',
-    };
-
-    render(<ActivityCard activity={recurringActivity} />);
-    expect(screen.getByText(/daily/i)).toBeDefined();
   });
 });

@@ -1,8 +1,12 @@
 'use client';
 
-import { useRef, useState } from 'react';
-import { Badge } from '@/components/Badge';
-import { EditableBadge, EditableInput, type SelectOption } from '@/components/editable';
+import { useEffect, useRef, useState } from 'react';
+import {
+  EditableBadge,
+  EditableContexts,
+  EditableInput,
+  type SelectOption,
+} from '@/components/editable';
 import { useCategories } from '@/hooks/useCategories';
 import type { ActivityWithDetails, UpdateActivityRequest } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -11,7 +15,6 @@ interface ActivityCardProps {
   activity: ActivityWithDetails;
   score?: number;
   reason?: string;
-  onComplete?: (id: number) => void;
   onToggle?: (id: number) => void;
   onUpdate?: (id: number, data: UpdateActivityRequest) => Promise<void>;
   isMutating?: boolean;
@@ -21,17 +24,23 @@ export function ActivityCard({
   activity,
   score,
   reason,
-  onComplete,
   onToggle,
   onUpdate,
   isMutating = false,
 }: ActivityCardProps) {
   const isCompleted = activity.is_completed === 1;
-  const isRecurring = activity.is_recurring === 1;
   const { categories } = useCategories();
 
   const [isOpen, setIsOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
   const detailsRef = useRef<HTMLDetailsElement>(null);
+
+  // Reset edit mode when card is closed
+  useEffect(() => {
+    if (!isOpen) {
+      setIsEditMode(false);
+    }
+  }, [isOpen]);
 
   const priorityLabels = {
     urgent: 'Urgente',
@@ -88,7 +97,8 @@ export function ActivityCard({
             value={activity.title}
             onSave={(value) => updateField('title', value)}
             placeholder="Sin título"
-            editable={isOpen}
+            isEditMode={isEditMode}
+            onEditComplete={() => setIsEditMode(false)}
             className={cn(
               'w-full text-base font-medium',
               isCompleted ? 'text-neutral-500 line-through' : 'text-neutral-100'
@@ -96,76 +106,24 @@ export function ActivityCard({
           />
         </div>
 
-        {/* Toggle Caret - Always visible */}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            if (detailsRef.current) {
-              detailsRef.current.open = !detailsRef.current.open;
-            }
-          }}
-          className="flex-shrink-0 w-6 h-6 rounded-full bg-neutral-800 hover:bg-neutral-700 transition-all flex items-center justify-center text-neutral-400 hover:text-neutral-300"
-          aria-label={isOpen ? 'Cerrar' : 'Abrir'}
-        >
-          <svg
-            width="12"
-            height="12"
-            viewBox="0 0 12 12"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-            className={cn('transition-transform duration-200', isOpen && 'rotate-180')}
-          >
-            <title>{isOpen ? 'Cerrar' : 'Abrir'}</title>
-            <path d="M3 8L6 5L9 8" />
-          </svg>
-        </button>
-      </summary>
-
-      {/* Expanded content - Editable */}
-      <div key={isOpen ? 'open' : 'closed'}>
-        <div className="flex justify-between items-center">
-          {/* Metadata - Editable */}
-          <div className="flex flex-wrap items-center gap-2">
-            {/* Category */}
-            {activity.category && (
-              <EditableBadge
-                value={activity.category_id || 0}
-                options={categoryOptions}
-                onSave={(value) => updateField('category_id', value)}
-                displayFormatter={(value) => {
-                  const cat = categories.find((c) => c.id === value);
-                  return cat?.name || '';
-                }}
-              />
+        <div className="flex items-center gap-2">
+          {/* Edit Button */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsEditMode(!isEditMode);
+            }}
+            className={cn(
+              'px-3 py-1 rounded-full text-xs font-medium transition-all',
+              isEditMode
+                ? 'bg-neutral-600 text-neutral-200'
+                : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'
             )}
-
-            {/* Priority */}
-            <EditableBadge
-              value={activity.priority}
-              options={priorityOptions}
-              onSave={(value) => updateField('priority', value)}
-              displayFormatter={(value) => priorityLabels[value as keyof typeof priorityLabels]}
-            />
-
-            {/* Energy Level */}
-            <EditableBadge
-              value={activity.energy_level || 'medium'}
-              options={energyOptions}
-              onSave={(value) => updateField('energy_level', value)}
-              displayFormatter={(value) =>
-                energyLabels[value as keyof typeof energyLabels] || 'Añadir energía'
-              }
-            />
-
-            {/* Recurring */}
-            {isRecurring && <Badge>{activity.recurrence_type}</Badge>}
-          </div>
+          >
+            {isEditMode ? 'Guardar' : 'Editar'}
+          </button>
 
           {/* Complete Button */}
           <button
@@ -173,10 +131,10 @@ export function ActivityCard({
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              isRecurring && onComplete ? onComplete(activity.id) : onToggle?.(activity.id);
+              onToggle?.(activity.id);
             }}
             className={cn(
-              'px-4 py-1 rounded-full text-sm font-medium transition-all',
+              'px-3 py-1 rounded-full text-xs font-medium transition-all',
               isCompleted
                 ? 'bg-neutral-700 text-neutral-400 cursor-not-allowed'
                 : 'bg-green-800 text-white hover:bg-green-600'
@@ -185,10 +143,95 @@ export function ActivityCard({
           >
             {isCompleted ? 'Completada' : score ? `${score}pts` : 'Completar'}
           </button>
+
+          {/* Toggle Caret */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (detailsRef.current) {
+                detailsRef.current.open = !detailsRef.current.open;
+              }
+            }}
+            className="flex-shrink-0 w-6 h-6 rounded-full bg-neutral-800 hover:bg-neutral-700 transition-all flex items-center justify-center text-neutral-400 hover:text-neutral-300"
+            aria-label={isOpen ? 'Cerrar' : 'Abrir'}
+          >
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 12 12"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+              className={cn('transition-transform duration-200', isOpen && 'rotate-180')}
+            >
+              <title>{isOpen ? 'Cerrar' : 'Abrir'}</title>
+              <path d="M3 8L6 5L9 8" />
+            </svg>
+          </button>
+        </div>
+      </summary>
+
+      {/* Expanded content - Editable */}
+      <div className="mt-3" key={isOpen ? 'open' : 'closed'}>
+        {/* Metadata - Editable */}
+        <div className="flex flex-wrap items-center gap-2 mb-2">
+          {/* Category */}
+          {activity.category && (
+            <EditableBadge
+              value={activity.category_id || 0}
+              options={categoryOptions}
+              onSave={(value) => updateField('category_id', value)}
+              displayFormatter={(value) => {
+                const cat = categories.find((c) => c.id === value);
+                return cat?.name || '';
+              }}
+              isEditMode={isEditMode}
+              onEditComplete={() => setIsEditMode(false)}
+            />
+          )}
+
+          {/* Priority */}
+          <EditableBadge
+            value={activity.priority}
+            options={priorityOptions}
+            onSave={(value) => updateField('priority', value)}
+            displayFormatter={(value) => priorityLabels[value as keyof typeof priorityLabels]}
+            isEditMode={isEditMode}
+            onEditComplete={() => setIsEditMode(false)}
+          />
+
+          {/* Energy Level */}
+          <EditableBadge
+            value={activity.energy_level || 'medium'}
+            options={energyOptions}
+            onSave={(value) => updateField('energy_level', value)}
+            displayFormatter={(value) =>
+              energyLabels[value as keyof typeof energyLabels] || 'Añadir energía'
+            }
+            isEditMode={isEditMode}
+            onEditComplete={() => setIsEditMode(false)}
+          />
+        </div>
+
+        {/* Contexts - Editable */}
+        <div className="flex gap-2 items-center">
+          <div className="text-xs text-neutral-500">
+            Contextos{isEditMode && ' (click para agregar/quitar)'}:
+          </div>
+          <EditableContexts
+            selectedContextIds={activity.contexts?.map((c) => c.id) || []}
+            onSave={(contextIds) => updateField('contexts', contextIds)}
+            isEditMode={isEditMode}
+          />
         </div>
 
         {/* Reason (for suggestions) */}
-        {reason && score !== undefined && <p className="text-xs text-neutral-500">{reason}</p>}
+        {reason && score !== undefined && <p className="text-xs text-neutral-500 mt-2">{reason}</p>}
       </div>
     </details>
   );

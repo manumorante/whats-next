@@ -50,11 +50,6 @@ export async function getActivities(
     args.push(filters.is_completed ? 1 : 0);
   }
 
-  if (filters?.is_recurring !== undefined) {
-    conditions.push('a.is_recurring = ?');
-    args.push(filters.is_recurring ? 1 : 0);
-  }
-
   if (conditions.length > 0) {
     sql += ` WHERE ${conditions.join(' AND ')}`;
   }
@@ -73,10 +68,6 @@ export async function getActivities(
       category_id: row.category_id as number | null,
       energy_level: row.energy_level as string | null as ActivityWithDetails['energy_level'],
       priority: row.priority as string as ActivityWithDetails['priority'],
-      is_recurring: row.is_recurring as number,
-      recurrence_type: row.recurrence_type as
-        | string
-        | null as ActivityWithDetails['recurrence_type'],
       is_completed: row.is_completed as number,
       created_at: row.created_at as string,
       completions_count: row.completions_count as number,
@@ -151,8 +142,8 @@ export async function createActivity(data: CreateActivityRequest): Promise<numbe
     sql: `
       INSERT INTO activities (
         title, description, category_id,
-        energy_level, priority, is_recurring, recurrence_type
-      ) VALUES (?, ?, ?, ?, ?, ?, ?)
+        energy_level, priority
+      ) VALUES (?, ?, ?, ?, ?)
     `,
     args: [
       data.title.trim(),
@@ -160,8 +151,6 @@ export async function createActivity(data: CreateActivityRequest): Promise<numbe
       data.category_id || null,
       data.energy_level || null,
       data.priority || 'someday',
-      data.is_recurring ? 1 : 0,
-      data.recurrence_type || null,
     ],
   });
 
@@ -223,16 +212,6 @@ export async function updateActivity(id: number, data: UpdateActivityRequest): P
   if (data.priority !== undefined) {
     fields.push('priority = ?');
     args.push(data.priority);
-  }
-
-  if (data.is_recurring !== undefined) {
-    fields.push('is_recurring = ?');
-    args.push(data.is_recurring ? 1 : 0);
-  }
-
-  if (data.recurrence_type !== undefined) {
-    fields.push('recurrence_type = ?');
-    args.push(data.recurrence_type || null);
   }
 
   if (data.is_completed !== undefined) {
