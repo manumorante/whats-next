@@ -7,8 +7,9 @@ interface EditableInputProps {
   value: string | number | null;
   onSave: (value: string | number | null) => Promise<void>;
   placeholder?: string;
-  type?: 'text' | 'number';
+  type?: 'text' | 'number' | 'textarea';
   min?: number;
+  rows?: number;
   displayFormatter?: (value: string | number | null) => string;
   inputClassName?: string;
   className?: string;
@@ -20,6 +21,7 @@ export function EditableInput({
   placeholder = 'Añadir...',
   type = 'text',
   min,
+  rows = 2,
   displayFormatter,
   inputClassName = '',
   className,
@@ -68,6 +70,23 @@ export function EditableInput({
   };
 
   if (isEditing) {
+    if (type === 'textarea') {
+      return (
+        <textarea
+          value={editValue}
+          onChange={(e) => setEditValue(e.target.value)}
+          onBlur={handleSave}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') {
+              cancelEditing();
+            }
+          }}
+          rows={rows}
+          className={inputClassName}
+        />
+      );
+    }
+
     return (
       <input
         type={type}

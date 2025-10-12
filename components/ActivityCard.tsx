@@ -5,7 +5,6 @@ import { Badge } from '@/components/Badge';
 import {
   EditableBadge,
   EditableInput,
-  EditableTextarea,
   type SelectOption,
 } from '@/components/editable';
 import { useCategories } from '@/hooks/useCategories';
@@ -146,14 +145,14 @@ export function ActivityCard({
       {/* Expanded content - Editable */}
       <div className="mt-3" key={isOpen ? 'open' : 'closed'}>
         {/* Description - Editable */}
-        <EditableTextarea
+        <EditableInput
+          type="textarea"
           value={activity.description}
           onSave={(value) => updateField('description', value)}
           placeholder="Añadir descripción..."
           rows={2}
-          className="mb-3"
-          textareaClassName="w-full px-2 py-1 bg-neutral-800 border border-neutral-700 rounded text-sm text-neutral-400 focus:outline-none focus:border-neutral-600 resize-none"
-          buttonClassName="text-sm text-neutral-400 cursor-pointer hover:text-neutral-300 transition-colors text-left w-full"
+          className="mb-3 text-sm text-neutral-400 cursor-pointer hover:text-neutral-300 transition-colors text-left w-full block"
+          inputClassName="w-full px-2 py-1 bg-neutral-800 border border-neutral-700 rounded text-sm text-neutral-400 focus:outline-none focus:border-neutral-600 resize-none"
         />
 
         <div className="flex justify-between items-center">
