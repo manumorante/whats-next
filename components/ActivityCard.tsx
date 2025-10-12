@@ -216,11 +216,9 @@ export function ActivityCard({
 
         {/* Contexts */}
         {activity.contexts && activity.contexts.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-2">
-            {activity.contexts.map((context) => (
-              <Badge key={context.id}>{context.label}</Badge>
-            ))}
-          </div>
+          <p className="text-xs text-neutral-500 mt-2">
+            {activity.contexts.map((context) => context.label).join(' · ')}
+          </p>
         )}
 
         {/* Reason (for suggestions) */}
