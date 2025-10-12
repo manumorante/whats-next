@@ -2,11 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { Badge } from '@/components/Badge';
-import {
-  EditableBadge,
-  EditableInput,
-  type SelectOption,
-} from '@/components/editable';
+import { EditableBadge, EditableInput, type SelectOption } from '@/components/editable';
 import { useCategories } from '@/hooks/useCategories';
 import type { ActivityWithDetails, UpdateActivityRequest } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -93,9 +89,8 @@ export function ActivityCard({
               value={activity.title}
               onSave={(value) => updateField('title', value)}
               placeholder="Sin título"
-              inputClassName="w-full px-2 py-1 bg-neutral-800 border border-neutral-700 rounded text-base font-medium text-neutral-100 focus:outline-none focus:border-neutral-600"
               className={cn(
-                'inline-block text-left text-base font-medium cursor-pointer hover:text-neutral-300 transition-colors',
+                'w-full text-base font-medium',
                 isCompleted ? 'text-neutral-500 line-through' : 'text-neutral-100'
               )}
             />
@@ -151,8 +146,7 @@ export function ActivityCard({
           onSave={(value) => updateField('description', value)}
           placeholder="Añadir descripción..."
           rows={2}
-          className="mb-3 text-sm text-neutral-400 cursor-pointer hover:text-neutral-300 transition-colors text-left w-full block"
-          inputClassName="w-full px-2 py-1 bg-neutral-800 border border-neutral-700 rounded text-sm text-neutral-400 focus:outline-none focus:border-neutral-600 resize-none"
+          className="mb-3"
         />
 
         <div className="flex justify-between items-center">

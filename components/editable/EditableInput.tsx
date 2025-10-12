@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Badge } from '@/components/Badge';
+import { cn } from '@/lib/utils';
 
 interface EditableInputProps {
   value: string | number | null;
@@ -10,8 +10,6 @@ interface EditableInputProps {
   type?: 'text' | 'number' | 'textarea';
   min?: number;
   rows?: number;
-  displayFormatter?: (value: string | number | null) => string;
-  inputClassName?: string;
   className?: string;
 }
 
@@ -22,16 +20,10 @@ export function EditableInput({
   type = 'text',
   min,
   rows = 2,
-  displayFormatter,
-  inputClassName = '',
-  className,
+  className = '',
 }: EditableInputProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
-
-  const displayValue = displayFormatter
-    ? displayFormatter(value)
-    : value?.toString() || placeholder;
 
   const startEditing = () => {
     setIsEditing(true);
@@ -69,52 +61,52 @@ export function EditableInput({
     }
   };
 
-  if (isEditing) {
-    if (type === 'textarea') {
-      return (
-        <textarea
-          value={editValue}
-          onChange={(e) => setEditValue(e.target.value)}
-          onBlur={handleSave}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') {
-              cancelEditing();
-            }
-          }}
-          rows={rows}
-          className={inputClassName}
-        />
-      );
-    }
-
+  if (type === 'textarea') {
     return (
-      <input
-        type={type}
-        value={editValue}
+      <textarea
+        value={isEditing ? editValue : value || ''}
         onChange={(e) => setEditValue(e.target.value)}
+        onFocus={startEditing}
         onBlur={handleSave}
         onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            e.currentTarget.blur();
-          } else if (e.key === 'Escape') {
+          if (e.key === 'Escape') {
             cancelEditing();
           }
         }}
-        min={min}
-        className={inputClassName}
+        rows={rows}
+        placeholder={placeholder}
+        readOnly={!isEditing}
+        className={cn(
+          'w-full px-2 py-1 bg-neutral-800 border border-neutral-700 rounded text-sm text-neutral-400 focus:outline-none focus:border-neutral-600 resize-none',
+          !isEditing && 'cursor-pointer hover:border-neutral-600',
+          className
+        )}
       />
     );
   }
 
   return (
-    <Badge
-      onClick={(e) => {
-        e.stopPropagation();
-        startEditing();
+    <input
+      type={type}
+      value={isEditing ? editValue : value || ''}
+      onChange={(e) => setEditValue(e.target.value)}
+      onFocus={startEditing}
+      onBlur={handleSave}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') {
+          e.currentTarget.blur();
+        } else if (e.key === 'Escape') {
+          cancelEditing();
+        }
       }}
-      className={className}
-    >
-      {displayValue}
-    </Badge>
+      min={min}
+      placeholder={placeholder}
+      readOnly={!isEditing}
+      className={cn(
+        'px-2 py-1 bg-neutral-800 border border-neutral-700 rounded text-neutral-300 focus:outline-none focus:border-neutral-600',
+        !isEditing && 'cursor-pointer hover:border-neutral-600',
+        className
+      )}
+    />
   );
 }
