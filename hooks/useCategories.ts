@@ -14,13 +14,9 @@ export function useCategories() {
    * Create a new category
    */
   const createCategory = async (name: string, color: string, icon?: string) => {
-    try {
-      const result = await categoriesApi.create(name, color, icon);
-      await mutate(); // Revalidate
-      return result;
-    } catch (error) {
-      throw error;
-    }
+    const result = await categoriesApi.create(name, color, icon);
+    await mutate(); // Revalidate
+    return result;
   };
 
   /**

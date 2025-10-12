@@ -21,10 +21,10 @@ describe('API Client', () => {
   it('should handle successful API responses', async () => {
     const mockData = { id: 1, title: 'Test Activity' };
 
-    (global.fetch as any).mockResolvedValueOnce({
+    vi.mocked(global.fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => mockData,
-    });
+    } as Response);
 
     const response = await fetch('/api/activities');
     const data = await response.json();
@@ -36,11 +36,11 @@ describe('API Client', () => {
   it('should handle API errors', async () => {
     const mockError = { error: 'Not found' };
 
-    (global.fetch as any).mockResolvedValueOnce({
+    vi.mocked(global.fetch).mockResolvedValueOnce({
       ok: false,
       status: 404,
       json: async () => mockError,
-    });
+    } as Response);
 
     const response = await fetch('/api/activities/999');
 
@@ -49,7 +49,7 @@ describe('API Client', () => {
   });
 
   it('should construct proper query strings for filters', () => {
-    const filters = {
+    const _filters = {
       category_id: 1,
       priority: 'urgent',
       is_completed: false,

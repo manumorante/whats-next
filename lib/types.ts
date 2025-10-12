@@ -104,7 +104,14 @@ export interface CreateActivityRequest {
   time_slots?: Omit<ActivityTimeSlot, 'id' | 'activity_id'>[];
 }
 
-export interface UpdateActivityRequest extends Partial<CreateActivityRequest> {
+export interface UpdateActivityRequest {
+  title?: string | null;
+  description?: string | null;
+  category_id?: number | null;
+  energy_level?: EnergyLevel | null;
+  priority?: Priority;
+  is_recurring?: boolean;
+  recurrence_type?: RecurrenceType | null;
   is_completed?: boolean;
 }
 

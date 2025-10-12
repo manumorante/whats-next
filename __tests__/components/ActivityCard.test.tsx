@@ -41,7 +41,7 @@ describe('ActivityCard Component', () => {
 
   it('should render activity title', () => {
     render(<ActivityCard activity={mockActivity} />);
-    expect(screen.getAllByText(/Test Activity/i).length).toBeGreaterThan(0);
+    expect(screen.getByDisplayValue('Test Activity')).toBeDefined();
   });
 
   it('should display category badge when expanded', async () => {

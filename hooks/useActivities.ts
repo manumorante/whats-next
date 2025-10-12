@@ -22,13 +22,9 @@ export function useActivities(filters?: GetActivitiesFilters) {
    * Create a new activity
    */
   const createActivity = async (data: CreateActivityRequest) => {
-    try {
-      const result = await activitiesApi.create(data);
-      await mutate(); // Revalidate data
-      return result;
-    } catch (error) {
-      throw error;
-    }
+    const result = await activitiesApi.create(data);
+    await mutate(); // Revalidate data
+    return result;
   };
 
   /**
@@ -46,13 +42,14 @@ export function useActivities(filters?: GetActivitiesFilters) {
 
             // Only update simple fields, skip complex relations
             const updated = { ...activity };
-            if (data.title !== undefined) updated.title = data.title;
-            if (data.description !== undefined) updated.description = data.description;
-            if (data.category_id !== undefined) updated.category_id = data.category_id;
+            if (data.title !== undefined) updated.title = data.title ?? '';
+            if (data.description !== undefined) updated.description = data.description ?? null;
+            if (data.category_id !== undefined) updated.category_id = data.category_id ?? null;
             if (data.priority !== undefined) updated.priority = data.priority;
-            if (data.energy_level !== undefined) updated.energy_level = data.energy_level;
+            if (data.energy_level !== undefined) updated.energy_level = data.energy_level ?? null;
             if (data.is_recurring !== undefined) updated.is_recurring = data.is_recurring ? 1 : 0;
-            if (data.recurrence_type !== undefined) updated.recurrence_type = data.recurrence_type;
+            if (data.recurrence_type !== undefined)
+              updated.recurrence_type = data.recurrence_type ?? null;
 
             return updated;
           });
@@ -136,8 +133,6 @@ export function useActivities(filters?: GetActivitiesFilters) {
     try {
       await activitiesApi.complete(id, notes);
       await mutate(); // Revalidate to update completion count
-    } catch (error) {
-      throw error;
     } finally {
       setMutatingId(null);
     }

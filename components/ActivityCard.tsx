@@ -82,28 +82,18 @@ export function ActivityCard({
       )}
     >
       <summary className="list-none flex items-center justify-between gap-3 [&::-webkit-details-marker]:hidden">
-        {/* Title - Editable only when open */}
-        <div className="flex-1 min-w-0" key={isOpen ? 'open' : 'closed'}>
-          {isOpen ? (
-            <EditableInput
-              value={activity.title}
-              onSave={(value) => updateField('title', value)}
-              placeholder="Sin título"
-              className={cn(
-                'w-full text-base font-medium',
-                isCompleted ? 'text-neutral-500 line-through' : 'text-neutral-100'
-              )}
-            />
-          ) : (
-            <h3
-              className={cn(
-                'text-base font-medium',
-                isCompleted ? 'text-neutral-500 line-through' : 'text-neutral-100'
-              )}
-            >
-              {activity.title}
-            </h3>
-          )}
+        {/* Title - Editable */}
+        <div className="flex-1 min-w-0">
+          <EditableInput
+            value={activity.title}
+            onSave={(value) => updateField('title', value)}
+            placeholder="Sin título"
+            editable={isOpen}
+            className={cn(
+              'w-full text-base font-medium',
+              isCompleted ? 'text-neutral-500 line-through' : 'text-neutral-100'
+            )}
+          />
         </div>
 
         {/* Toggle Caret - Always visible */}
@@ -138,10 +128,10 @@ export function ActivityCard({
       </summary>
 
       {/* Expanded content - Editable */}
-      <div className="mt-3" key={isOpen ? 'open' : 'closed'}>
+      <div key={isOpen ? 'open' : 'closed'}>
         <div className="flex justify-between items-center">
           {/* Metadata - Editable */}
-          <div className="flex flex-wrap items-center gap-2 mb-2">
+          <div className="flex flex-wrap items-center gap-2">
             {/* Category */}
             {activity.category && (
               <EditableBadge
@@ -193,26 +183,12 @@ export function ActivityCard({
             )}
             disabled={isMutating || isCompleted}
           >
-            {isCompleted ? 'Completada' : 'Completar'}
+            {isCompleted ? 'Completada' : score ? `${score}pts` : 'Completar'}
           </button>
         </div>
 
-        {/* Contexts */}
-        {activity.contexts && activity.contexts.length > 0 && (
-          <p className="text-xs text-neutral-500 mt-2">
-            {activity.contexts.map((context) => context.label).join(' · ')}
-          </p>
-        )}
-
         {/* Reason (for suggestions) */}
-        {reason && score !== undefined && (
-          <div className="mt-2 pt-2 border-t border-neutral-800">
-            <div className="flex items-center justify-between">
-              <p className="text-xs text-neutral-500">{reason}</p>
-              <span className="text-xs font-mono text-neutral-600">{score}pts</span>
-            </div>
-          </div>
-        )}
+        {reason && score !== undefined && <p className="text-xs text-neutral-500">{reason}</p>}
       </div>
     </details>
   );

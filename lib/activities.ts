@@ -56,7 +56,7 @@ export async function getActivities(
   }
 
   if (conditions.length > 0) {
-    sql += ' WHERE ' + conditions.join(' AND ');
+    sql += ` WHERE ${conditions.join(' AND ')}`;
   }
 
   sql += ' GROUP BY a.id ORDER BY a.priority DESC, a.created_at DESC';
@@ -202,7 +202,7 @@ export async function updateActivity(id: number, data: UpdateActivityRequest): P
 
   if (data.title !== undefined) {
     fields.push('title = ?');
-    args.push(data.title.trim());
+    args.push(data.title ? data.title.trim() : null);
   }
 
   if (data.description !== undefined) {

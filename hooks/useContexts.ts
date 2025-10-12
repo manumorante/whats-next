@@ -20,13 +20,9 @@ export function useContexts() {
     time_start?: string,
     time_end?: string
   ) => {
-    try {
-      const result = await contextsApi.create(name, label, days, time_start, time_end);
-      await mutate(); // Revalidate
-      return result;
-    } catch (error) {
-      throw error;
-    }
+    const result = await contextsApi.create(name, label, days, time_start, time_end);
+    await mutate(); // Revalidate
+    return result;
   };
 
   /**

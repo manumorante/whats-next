@@ -7,9 +7,9 @@ interface EditableInputProps {
   value: string | number | null;
   onSave: (value: string | number | null) => Promise<void>;
   placeholder?: string;
-  type?: 'text' | 'number' | 'textarea';
+  type?: 'text' | 'number';
   min?: number;
-  rows?: number;
+  editable?: boolean;
   className?: string;
 }
 
@@ -19,13 +19,14 @@ export function EditableInput({
   placeholder = 'Añadir...',
   type = 'text',
   min,
-  rows = 2,
+  editable = true,
   className = '',
 }: EditableInputProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
 
   const startEditing = () => {
+    if (!editable) return;
     setIsEditing(true);
     setEditValue(value?.toString() || '');
   };
@@ -61,30 +62,6 @@ export function EditableInput({
     }
   };
 
-  if (type === 'textarea') {
-    return (
-      <textarea
-        value={isEditing ? editValue : value || ''}
-        onChange={(e) => setEditValue(e.target.value)}
-        onFocus={startEditing}
-        onBlur={handleSave}
-        onKeyDown={(e) => {
-          if (e.key === 'Escape') {
-            cancelEditing();
-          }
-        }}
-        rows={rows}
-        placeholder={placeholder}
-        readOnly={!isEditing}
-        className={cn(
-          'w-full px-2 py-1 bg-neutral-800 border border-neutral-700 rounded text-sm text-neutral-400 focus:outline-none focus:border-neutral-600 resize-none',
-          !isEditing && 'cursor-pointer hover:border-neutral-600',
-          className
-        )}
-      />
-    );
-  }
-
   return (
     <input
       type={type}
@@ -103,8 +80,11 @@ export function EditableInput({
       placeholder={placeholder}
       readOnly={!isEditing}
       className={cn(
-        'px-2 py-1 bg-neutral-800 border border-neutral-700 rounded text-neutral-300 focus:outline-none focus:border-neutral-600',
-        !isEditing && 'cursor-pointer hover:border-neutral-600',
+        'bg-transparent border-0 p-0 text-neutral-300',
+        editable && !isEditing && 'cursor-pointer hover:text-neutral-100',
+        !editable && 'pointer-events-none',
+        isEditing &&
+          'px-2 py-1 bg-neutral-800 border border-neutral-700 rounded focus:outline-none focus:border-neutral-600',
         className
       )}
     />
