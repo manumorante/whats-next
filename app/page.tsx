@@ -41,17 +41,9 @@ export default function Home() {
           />
         </section>
 
-        {/* Category Filter */}
-        <section>
-          <CategoryFilter
-            selectedCategory={selectedCategory}
-            onSelectCategory={setSelectedCategory}
-          />
-        </section>
-
         {/* Primary suggestion */}
         <section className="space-y-6">
-          <SuggestionsList limit={1} category={selectedCategory} />
+          <SuggestionsList limit={1} />
         </section>
 
         {/* Secondary content */}
@@ -61,10 +53,18 @@ export default function Home() {
             onClick={() => setViewMode(viewMode === 'suggestions' ? 'all' : 'suggestions')}
             className="w-full rounded-3xl border border-neutral-200 px-6 py-4 text-base font-medium text-neutral-700 transition-colors hover:border-neutral-300 hover:text-neutral-900 dark:border-neutral-800 dark:text-neutral-300 dark:hover:border-neutral-700 dark:hover:text-neutral-100"
           >
-            {viewMode === 'suggestions' ? 'Ver historial de actividades' : 'Volver a la sugerencia'}
+            {viewMode === 'suggestions' ? 'Todas todas' : 'Ocultar todas'}
           </button>
 
-          {viewMode === 'all' && <AllActivitiesList category={selectedCategory} />}
+          {viewMode === 'all' && (
+            <>
+              <CategoryFilter
+                selectedCategory={selectedCategory}
+                onSelectCategory={setSelectedCategory}
+              />
+              <AllActivitiesList category={selectedCategory} />
+            </>
+          )}
         </section>
 
         <footer className="mt-auto text-center text-xs text-neutral-500 dark:text-neutral-500">
