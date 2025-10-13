@@ -30,7 +30,7 @@ export function CurrentTimeInfo() {
   return (
     <div className="flex flex-col gap-8">
       <div className="space-y-2">
-        <p className="text-hero-display font-semibold leading-none text-neutral-900 dark:text-neutral-100">
+        <p className="text-hero-display font-black leading-none text-neutral-900 dark:text-neutral-100">
           {timeString}
         </p>
         <p className="text-xl capitalize text-neutral-500 dark:text-neutral-400">{dayString}</p>

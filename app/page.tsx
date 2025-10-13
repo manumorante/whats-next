@@ -17,16 +17,13 @@ export default function Home() {
 
   return (
     <div className="min-h-[100svh] bg-neutral-50 transition-colors duration-300 dark:bg-neutral-950">
-      <div className="mx-auto flex min-h-[100svh] w-full max-w-3xl flex-col gap-10 px-6 pb-20 pt-14">
+      <div className="mx-auto flex min-h-[100svh] w-full max-w-3xl flex-col gap-10 px-6 pb-20 pt-8">
         {/* Hero */}
-        <header className="flex flex-col gap-6">
-          <div className="space-y-2">
-            <h1 className="text-hero-title font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
-              ¿Qué sigue?
+        <header className="flex flex-col gap-3">
+          <div className="flex gap-2 items-center">
+            <h1 className="text-lg font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
+              What's Next?
             </h1>
-            <p className="text-base text-neutral-600 dark:text-neutral-400">
-              Una única recomendación pensada para tu momento actual.
-            </p>
           </div>
 
           <CurrentTimeInfo />

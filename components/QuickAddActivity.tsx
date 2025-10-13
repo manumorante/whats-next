@@ -94,7 +94,7 @@ export function QuickAddActivity({ onAdd }: QuickAddActivityProps) {
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Añadir nueva actividad..."
         disabled={isAdding}
-        className="w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-neutral-100 placeholder-neutral-500 focus:outline-none focus:border-neutral-700 transition-colors disabled:opacity-50"
+        className="w-full rounded-3xl border border-neutral-300 bg-white px-5 py-4 text-base text-neutral-900 placeholder-neutral-500 transition-colors focus:outline-none focus:border-neutral-400 focus:ring-2 focus:ring-neutral-200 disabled:opacity-50 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 dark:focus:border-neutral-700 dark:focus:ring-neutral-800"
       />
     </form>
   );

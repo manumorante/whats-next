@@ -125,10 +125,10 @@ export function ActivityCard({
       ref={detailsRef}
       onToggle={(e) => setIsOpen(e.currentTarget.open)}
       className={cn(
-        'group relative bg-neutral-900 rounded-lg p-4 border transition-all',
+        'group relative rounded-3xl border transition-all shadow-sm p-4',
         isCompleted
-          ? 'border-neutral-800 opacity-60'
-          : 'border-neutral-800 hover:border-neutral-700',
+          ? 'bg-neutral-200/80 border-neutral-200 opacity-70 dark:bg-neutral-900 dark:border-neutral-800'
+          : 'bg-white/95 border-neutral-200 hover:border-neutral-300 dark:bg-neutral-900 dark:border-neutral-800 dark:hover:border-neutral-700',
         isMutating && 'opacity-50 pointer-events-none'
       )}
     >
@@ -143,7 +143,9 @@ export function ActivityCard({
             onEditComplete={handleEditComplete}
             className={cn(
               'w-full text-base font-medium',
-              isCompleted ? 'text-neutral-500 line-through' : 'text-neutral-100'
+              isCompleted
+                ? 'text-neutral-500 line-through dark:text-neutral-500'
+                : 'text-neutral-900 dark:text-neutral-100'
             )}
           />
         </div>
@@ -157,12 +159,11 @@ export function ActivityCard({
               e.stopPropagation();
               setIsEditMode(!isEditMode);
             }}
-            className={cn(
-              'px-3 py-1 rounded-full text-xs font-medium transition-all',
-              isEditMode
-                ? 'bg-neutral-600 text-neutral-200'
-                : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'
-            )}
+            className={cn('px-3 py-1 rounded-full text-xs font-medium transition-all', {
+              'bg-neutral-900 text-white dark:bg-neutral-600': isEditMode,
+              'bg-neutral-200 text-neutral-700 hover:bg-neutral-300 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700':
+                !isEditMode,
+            })}
           >
             {isEditMode ? 'Guardar' : 'Editar'}
           </button>
@@ -178,8 +179,8 @@ export function ActivityCard({
             className={cn(
               'px-3 py-1 rounded-full text-xs font-medium transition-all',
               isCompleted
-                ? 'bg-neutral-700 text-neutral-400 cursor-not-allowed'
-                : 'bg-green-800 text-white hover:bg-green-600'
+                ? 'bg-neutral-200 text-neutral-400 cursor-not-allowed dark:bg-neutral-700 dark:text-neutral-400'
+                : 'bg-emerald-600 text-white hover:bg-emerald-500 dark:bg-green-800 dark:hover:bg-green-600'
             )}
             disabled={isMutating || isCompleted}
           >
@@ -221,7 +222,7 @@ export function ActivityCard({
       {/* Expanded content - Editable */}
       <div className="mt-3" key={isOpen ? 'open' : 'closed'}>
         {/* Metadata - Editable */}
-        <div className="flex flex-wrap items-center gap-2 mb-2">
+        <div className="flex flex-wrap items-center gap-2 mb-3">
           {badgeConfigs.map((badge) => (
             <EditableBadge
               key={badge.key}
@@ -248,7 +249,9 @@ export function ActivityCard({
         </div>
 
         {/* Reason (for suggestions) */}
-        {reason && score !== undefined && <p className="text-xs text-neutral-500 mt-2">{reason}</p>}
+        {reason && score !== undefined && (
+          <p className="mt-3 text-sm text-neutral-500 dark:text-neutral-400">{reason}</p>
+        )}
       </div>
     </details>
   );

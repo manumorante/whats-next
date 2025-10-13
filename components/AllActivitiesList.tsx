@@ -60,7 +60,7 @@ export function AllActivitiesList({ category }: AllActivitiesListProps) {
     <div className="space-y-4">
       {/* Toggle para mostrar completadas */}
       <div className="flex items-center justify-between">
-        <div className="text-sm text-neutral-400">
+        <div className="text-sm text-neutral-600 dark:text-neutral-400">
           {activeActivities.length} activa{activeActivities.length !== 1 ? 's' : ''}
           {completedActivities.length > 0 &&
             ` · ${completedActivities.length} completada${completedActivities.length !== 1 ? 's' : ''}`}
@@ -72,8 +72,8 @@ export function AllActivitiesList({ category }: AllActivitiesListProps) {
           className={cn(
             'px-3 py-1 text-xs rounded-full transition-all',
             showCompleted
-              ? 'bg-neutral-700 text-neutral-200'
-              : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'
+              ? 'bg-neutral-900 text-white dark:bg-neutral-700 dark:text-neutral-200'
+              : 'bg-neutral-200 text-neutral-600 hover:bg-neutral-300 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700'
           )}
         >
           {showCompleted ? 'Ocultar completadas' : 'Mostrar completadas'}
@@ -83,7 +83,7 @@ export function AllActivitiesList({ category }: AllActivitiesListProps) {
       {/* Lista de actividades activas */}
       {activeActivities.length > 0 && (
         <div className="space-y-3">
-          <h3 className="text-sm font-medium text-neutral-300">
+          <h3 className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
             Activas
             {activeContexts.length > 0 && (
               <span className="ml-2 text-xs text-neutral-500 font-normal">
@@ -112,7 +112,7 @@ export function AllActivitiesList({ category }: AllActivitiesListProps) {
                     {isExpanded ? '▼' : '▶'} Debug
                   </button>
                   {isExpanded && (
-                    <div className="flex-1 text-xs text-neutral-600 space-y-0.5">
+                    <div className="flex-1 text-xs text-neutral-500 dark:text-neutral-400 space-y-0.5">
                       {reasons.map((reason) => (
                         <div key={reason}>{reason}</div>
                       ))}

@@ -28,10 +28,10 @@ export function CategoryFilter({ selectedCategory, onSelectCategory }: CategoryF
         type="button"
         onClick={() => onSelectCategory(undefined)}
         className={cn(
-          'px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-colors',
+          'px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors',
           selectedCategory === undefined
-            ? 'bg-neutral-700 text-neutral-100'
-            : 'bg-neutral-900 text-neutral-400 hover:bg-neutral-800'
+            ? 'bg-neutral-900 text-white dark:bg-neutral-200 dark:text-neutral-900'
+            : 'bg-neutral-200 text-neutral-600 hover:bg-neutral-300 dark:bg-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800'
         )}
       >
         Todas
@@ -44,10 +44,10 @@ export function CategoryFilter({ selectedCategory, onSelectCategory }: CategoryF
           type="button"
           onClick={() => onSelectCategory(category.id)}
           className={cn(
-            'px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-colors',
+            'px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors',
             selectedCategory === category.id
-              ? 'text-neutral-100'
-              : 'bg-neutral-900 text-neutral-400 hover:bg-neutral-800'
+              ? 'text-white dark:text-neutral-900'
+              : 'bg-neutral-200 text-neutral-600 hover:bg-neutral-300 dark:bg-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800'
           )}
           style={{
             backgroundColor: selectedCategory === category.id ? category.color : undefined,

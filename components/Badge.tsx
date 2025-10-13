@@ -14,10 +14,11 @@ export function Badge({ children, className, onClick }: BadgeProps) {
       type={onClick ? 'button' : undefined}
       onClick={onClick}
       className={cn(
-        'inline-flex items-center px-2 py-0.5 text-xs rounded font-medium',
-        'bg-neutral-800 text-neutral-300',
+        'inline-flex items-center px-3 py-1 text-xs rounded-full font-medium transition-colors',
+        'bg-neutral-200 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300',
         !onClick && 'cursor-default',
-        onClick && 'cursor-pointer hover:bg-neutral-700 transition-colors',
+        onClick &&
+          'cursor-pointer hover:bg-neutral-300 dark:hover:bg-neutral-700 border border-transparent',
         className
       )}
     >
