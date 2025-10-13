@@ -28,21 +28,29 @@ export function CurrentTimeInfo() {
   });
 
   return (
-    <div className="w-full mb-6 flex items-center justify-between">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-2xl font-bold text-neutral-100">{timeString}</p>
-          <p className="text-sm text-neutral-400 capitalize">{dayString}</p>
-        </div>
+    <div className="flex flex-col gap-8">
+      <div className="space-y-2">
+        <p className="text-hero-display font-semibold leading-none text-neutral-900 dark:text-neutral-100">
+          {timeString}
+        </p>
+        <p className="text-xl capitalize text-neutral-500 dark:text-neutral-400">{dayString}</p>
       </div>
 
-      {/* Active contexts */}
       {!isLoading && activeContexts.length > 0 && (
-        <div className="flex flex-wrap gap-2 justify-end">
-          <span className="text-xs text-neutral-500">Activo:</span>
-          {activeContexts.map((context) => (
-            <Badge key={context.id}>{context.label}</Badge>
+        <div className="flex flex-wrap gap-3">
+          {activeContexts.slice(0, 3).map((context) => (
+            <Badge
+              key={context.id}
+              className="rounded-2xl bg-neutral-200/70 px-4 py-2 text-sm font-medium text-neutral-700 dark:bg-neutral-800/70 dark:text-neutral-200"
+            >
+              {context.label}
+            </Badge>
           ))}
+          {activeContexts.length > 3 && (
+            <Badge className="rounded-2xl bg-neutral-200/70 px-4 py-2 text-sm font-medium text-neutral-700 dark:bg-neutral-800/70 dark:text-neutral-200">
+              +{activeContexts.length - 3}
+            </Badge>
+          )}
         </div>
       )}
     </div>

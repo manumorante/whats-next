@@ -7,7 +7,6 @@ import { CurrentTimeInfo } from '@/components/CurrentTimeInfo';
 import { QuickAddActivity } from '@/components/QuickAddActivity';
 import { SuggestionsList } from '@/components/SuggestionsList';
 import { useActivities } from '@/hooks/useActivities';
-import { cn } from '@/lib/utils';
 
 type ViewMode = 'suggestions' | 'all';
 
@@ -17,82 +16,63 @@ export default function Home() {
   const { createActivity } = useActivities();
 
   return (
-    <div className="min-h-screen bg-neutral-50 p-4 transition-colors duration-300 dark:bg-neutral-950 md:p-8">
-      <div className="mx-auto max-w-4xl">
-        {/* Header */}
-        <header className="mb-8">
-          <h1 className="mb-2 text-3xl font-bold text-neutral-900 dark:text-neutral-100">
-            ¿Qué sigue?
-          </h1>
-          <p className="text-sm text-neutral-600 dark:text-neutral-400">
-            Actividades inteligentes según tu momento del día
-          </p>
+    <div className="min-h-[100svh] bg-neutral-50 transition-colors duration-300 dark:bg-neutral-950">
+      <div className="mx-auto flex min-h-[100svh] w-full max-w-3xl flex-col gap-10 px-6 pb-20 pt-14">
+        {/* Hero */}
+        <header className="flex flex-col gap-6">
+          <div className="space-y-2">
+            <h1 className="text-hero-title font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
+              ¿Qué sigue?
+            </h1>
+            <p className="text-base text-neutral-600 dark:text-neutral-400">
+              Una única recomendación pensada para tu momento actual.
+            </p>
+          </div>
+
+          <CurrentTimeInfo />
         </header>
 
-        {/* Current Time & Contexts */}
-        <CurrentTimeInfo />
+        {/* Primary suggestion */}
+        <section className="space-y-6">
+          <SuggestionsList limit={1} category={selectedCategory} />
+        </section>
 
         {/* Quick Add */}
-        <QuickAddActivity
-          onAdd={async (title, suggestedData) => {
-            await createActivity({
-              title,
-              ...suggestedData,
-            });
-          }}
-        />
-
-        {/* View Mode Toggle */}
-        <div className="mb-6 flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setViewMode('suggestions')}
-            className={cn(
-              'px-4 py-2 rounded-lg text-sm font-medium transition-all',
-              viewMode === 'suggestions'
-                ? 'bg-neutral-800 text-neutral-100'
-                : 'bg-transparent text-neutral-500 hover:text-neutral-300'
-            )}
-          >
-            Sugerencias
-          </button>
-          <button
-            type="button"
-            onClick={() => setViewMode('all')}
-            className={cn(
-              'px-4 py-2 rounded-lg text-sm font-medium transition-all',
-              viewMode === 'all'
-                ? 'bg-neutral-800 text-neutral-100'
-                : 'bg-transparent text-neutral-500 hover:text-neutral-300'
-            )}
-          >
-            Todas las actividades
-          </button>
-        </div>
+        <section className="space-y-4">
+          <QuickAddActivity
+            onAdd={async (title, suggestedData) => {
+              await createActivity({
+                title,
+                ...suggestedData,
+              });
+            }}
+          />
+        </section>
 
         {/* Category Filter */}
-        <div className="mb-6">
+        <section>
           <CategoryFilter
             selectedCategory={selectedCategory}
             onSelectCategory={setSelectedCategory}
           />
-        </div>
+        </section>
 
-        {/* Content based on view mode */}
-        {viewMode === 'suggestions' ? (
-          <SuggestionsList limit={10} category={selectedCategory} />
-        ) : (
-          <AllActivitiesList category={selectedCategory} />
-        )}
+        {/* Secondary content */}
+        <section className="space-y-4">
+          <button
+            type="button"
+            onClick={() => setViewMode(viewMode === 'suggestions' ? 'all' : 'suggestions')}
+            className="w-full rounded-3xl border border-neutral-200 px-6 py-4 text-base font-medium text-neutral-700 transition-colors hover:border-neutral-300 hover:text-neutral-900 dark:border-neutral-800 dark:text-neutral-300 dark:hover:border-neutral-700 dark:hover:text-neutral-100"
+          >
+            {viewMode === 'suggestions' ? 'Ver historial de actividades' : 'Volver a la sugerencia'}
+          </button>
 
-        {/* Footer hint */}
-        {viewMode === 'suggestions' && (
-          <div className="mt-8 text-center">
-            <p className="text-xs text-neutral-600">
-              Las sugerencias se actualizan automáticamente cada 5 minutos
-            </p>
-          </div>
-        )}
+          {viewMode === 'all' && <AllActivitiesList category={selectedCategory} />}
+        </section>
+
+        <footer className="mt-auto text-center text-xs text-neutral-500 dark:text-neutral-500">
+          Las sugerencias se actualizan automáticamente cada 5 minutos
+        </footer>
       </div>
     </div>
   );
