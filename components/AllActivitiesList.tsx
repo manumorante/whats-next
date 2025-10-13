@@ -1,11 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { ActivityCard } from '@/components/ActivityCard';
 import { Loading } from '@/components/Loading';
 import { useActivities } from '@/hooks/useActivities';
-import { contextsApi } from '@/lib/api';
-import type { ContextParsed, GetActivitiesFilters } from '@/lib/types';
+import { useActiveContexts } from '@/hooks/useContexts';
+import type {
+  ActivityTimeSlot,
+  ActivityWithDetails,
+  ContextParsed,
+  GetActivitiesFilters,
+} from '@/lib/types';
 import { cn } from '@/lib/utils';
 
 interface AllActivitiesListProps {
@@ -14,7 +19,6 @@ interface AllActivitiesListProps {
 
 export function AllActivitiesList({ category }: AllActivitiesListProps) {
   const [showCompleted, setShowCompleted] = useState(false);
-  const [activeContexts, setActiveContexts] = useState<ContextParsed[]>([]);
   const [expandedActivityId, setExpandedActivityId] = useState<number | null>(null);
 
   const filters: GetActivitiesFilters = {
@@ -24,11 +28,7 @@ export function AllActivitiesList({ category }: AllActivitiesListProps) {
 
   const { activities, isLoading, error, toggleActivity, updateActivity, mutatingId } =
     useActivities(filters);
-
-  // Get active contexts for debug info
-  useEffect(() => {
-    contextsApi.getActive().then(setActiveContexts).catch(console.error);
-  }, []);
+  const { activeContexts } = useActiveContexts();
 
   if (isLoading) {
     return <Loading />;
@@ -54,6 +54,7 @@ export function AllActivitiesList({ category }: AllActivitiesListProps) {
   // Agrupar actividades por estado
   const activeActivities = activities.filter((a) => a.is_completed === 0);
   const completedActivities = activities.filter((a) => a.is_completed === 1);
+  const now = new Date();
 
   return (
     <div className="space-y-4">
@@ -91,71 +92,7 @@ export function AllActivitiesList({ category }: AllActivitiesListProps) {
             )}
           </h3>
           {activeActivities.map((activity) => {
-            const hasContexts = activity.contexts && activity.contexts.length > 0;
-            const hasTimeSlots = activity.time_slots && activity.time_slots.length > 0;
-            const now = new Date();
-            const currentTime = now.toTimeString().substring(0, 5);
-            const currentDayName = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][now.getDay()];
-
-            // Calculate why it's not suggested
-            const reasons = [];
-
-            if (!hasContexts && !hasTimeSlots) {
-              reasons.push('❌ Sin contextos ni horarios definidos');
-            } else {
-              // Check context match
-              if (hasContexts) {
-                const activeContextIds = activeContexts.map((c) => c.id);
-                const matchingContexts = activity.contexts?.filter((c) =>
-                  activeContextIds.includes(c.id)
-                );
-
-                if (matchingContexts && matchingContexts.length > 0) {
-                  reasons.push(
-                    `✅ Contexto activo: ${matchingContexts.map((c) => c.label).join(', ')}`
-                  );
-                } else {
-                  const contextNames = activity.contexts?.map((c) => c.label).join(', ') || '';
-                  reasons.push(`⏸️ Contextos: ${contextNames} (no activos ahora)`);
-                }
-              }
-
-              // Check time slot match
-              if (hasTimeSlots) {
-                const matchingSlots = activity.time_slots?.filter((slot) => {
-                  const dayMatches = !slot.day_of_week || slot.day_of_week === currentDayName;
-
-                  // Handle time ranges that cross midnight
-                  let timeMatches: boolean;
-                  if (slot.time_end < slot.time_start) {
-                    // Range crosses midnight
-                    timeMatches = currentTime >= slot.time_start || currentTime <= slot.time_end;
-                  } else {
-                    // Normal range
-                    timeMatches = currentTime >= slot.time_start && currentTime <= slot.time_end;
-                  }
-
-                  return dayMatches && timeMatches;
-                });
-
-                if (matchingSlots && matchingSlots.length > 0) {
-                  reasons.push(
-                    `✅ Horario: ${matchingSlots.map((s) => `${s.time_start}-${s.time_end}`).join(', ')}`
-                  );
-                } else {
-                  const slotInfo =
-                    activity.time_slots
-                      ?.map((s) => `${s.day_of_week || 'todos'} ${s.time_start}-${s.time_end}`)
-                      .join(', ') || '';
-                  reasons.push(`⏸️ Horarios: ${slotInfo} (fuera de horario)`);
-                }
-              }
-            }
-
-            if (activity.completions_count && activity.completions_count > 0) {
-              reasons.push(`📊 ${activity.completions_count}x completada`);
-            }
-
+            const reasons = describeActivityStatus(activity, activeContexts, now);
             const isExpanded = expandedActivityId === activity.id;
 
             return (
@@ -205,4 +142,73 @@ export function AllActivitiesList({ category }: AllActivitiesListProps) {
       )}
     </div>
   );
+}
+
+const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const;
+
+function describeActivityStatus(
+  activity: ActivityWithDetails,
+  activeContexts: ContextParsed[],
+  now: Date
+) {
+  const reasons: string[] = [];
+  const hasContexts = Boolean(activity.contexts?.length);
+  const hasTimeSlots = Boolean(activity.time_slots?.length);
+
+  if (!hasContexts && !hasTimeSlots) {
+    reasons.push('❌ Sin contextos ni horarios definidos');
+  } else {
+    if (hasContexts) {
+      const activeIds = new Set(activeContexts.map((context) => context.id));
+      const matchingContexts = activity.contexts?.filter((context) => activeIds.has(context.id));
+
+      if (matchingContexts?.length) {
+        reasons.push(`✅ Contexto activo: ${matchingContexts.map((c) => c.label).join(', ')}`);
+      } else {
+        const contextNames = activity.contexts?.map((c) => c.label).join(', ') || '';
+        reasons.push(`⏸️ Contextos: ${contextNames} (no activos ahora)`);
+      }
+    }
+
+    if (hasTimeSlots) {
+      const { currentTime, currentDayName } = getCurrentTimeInfo(now);
+      const matchingSlots = activity.time_slots?.filter((slot) => {
+        const dayMatches = !slot.day_of_week || slot.day_of_week === currentDayName;
+        const crossesMidnight = slot.time_end < slot.time_start;
+
+        if (crossesMidnight) {
+          return currentTime >= slot.time_start || currentTime <= slot.time_end;
+        }
+
+        return currentTime >= slot.time_start && currentTime <= slot.time_end;
+      });
+
+      if (matchingSlots?.length) {
+        reasons.push(`✅ Horario: ${matchingSlots.map(formatSlot).join(', ')}`);
+      } else {
+        const slotInfo =
+          activity.time_slots
+            ?.map((slot) => `${slot.day_of_week || 'todos'} ${formatSlot(slot)}`)
+            .join(', ') || '';
+        reasons.push(`⏸️ Horarios: ${slotInfo} (fuera de horario)`);
+      }
+    }
+  }
+
+  if (activity.completions_count && activity.completions_count > 0) {
+    reasons.push(`📊 ${activity.completions_count}x completada`);
+  }
+
+  return reasons;
+}
+
+function getCurrentTimeInfo(now: Date) {
+  return {
+    currentTime: now.toTimeString().substring(0, 5),
+    currentDayName: DAY_NAMES[now.getDay()],
+  };
+}
+
+function formatSlot(slot: ActivityTimeSlot) {
+  return `${slot.time_start}-${slot.time_end}`;
 }

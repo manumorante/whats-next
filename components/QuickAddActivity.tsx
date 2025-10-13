@@ -2,6 +2,47 @@
 
 import { useState } from 'react';
 import { useActiveContexts } from '@/hooks/useContexts';
+import type { EnergyLevel, Priority } from '@/lib/types';
+
+type SuggestedDefaults = {
+  category_id: number;
+  priority: Priority;
+  energy_level: EnergyLevel;
+};
+
+type SuggestionRule = {
+  matches: (context: { day: number; hour: number }) => boolean;
+  apply: Partial<SuggestedDefaults>;
+};
+
+const DEFAULT_SUGGESTION: SuggestedDefaults = {
+  category_id: 1,
+  priority: 'important',
+  energy_level: 'medium',
+};
+
+const SUGGESTION_RULES: SuggestionRule[] = [
+  {
+    matches: ({ day }) => day === 0 || day === 6,
+    apply: { category_id: 2, priority: 'someday' },
+  },
+  {
+    matches: ({ hour }) => hour >= 6 && hour < 9,
+    apply: { energy_level: 'high', priority: 'important' },
+  },
+  {
+    matches: ({ hour }) => hour >= 9 && hour < 18,
+    apply: { category_id: 1, energy_level: 'medium' },
+  },
+  {
+    matches: ({ hour }) => hour >= 18 && hour < 22,
+    apply: { energy_level: 'low', category_id: 2 },
+  },
+  {
+    matches: ({ hour }) => hour >= 22 || hour < 6,
+    apply: { energy_level: 'low', category_id: 4, priority: 'someday' },
+  },
+];
 
 interface QuickAddActivityProps {
   onAdd: (title: string, suggestedData: Record<string, unknown>) => Promise<void>;
@@ -14,47 +55,18 @@ export function QuickAddActivity({ onAdd }: QuickAddActivityProps) {
 
   const getSuggestedData = () => {
     const now = new Date();
-    const hour = now.getHours();
-    const day = now.getDay();
+    const context = { day: now.getDay(), hour: now.getHours() };
+    const suggestion: SuggestedDefaults = { ...DEFAULT_SUGGESTION };
 
-    // Suggest category based on time and day
-    let suggestedCategoryId = 1; // Default: Productiva
-    let suggestedPriority: 'urgent' | 'important' | 'someday' = 'important';
-    let suggestedEnergyLevel: 'low' | 'medium' | 'high' = 'medium';
-
-    // Weekend = Ocio (2) or Social (3)
-    if (day === 0 || day === 6) {
-      suggestedCategoryId = 2; // Ocio
-      suggestedPriority = 'someday';
-    }
-
-    // Early morning (6-9) = high energy
-    if (hour >= 6 && hour < 9) {
-      suggestedEnergyLevel = 'high';
-      suggestedPriority = 'important';
-    }
-    // Work hours (9-18) = Productiva
-    else if (hour >= 9 && hour < 18) {
-      suggestedCategoryId = 1; // Productiva
-      suggestedEnergyLevel = 'medium';
-    }
-    // Evening (18-22) = medium/low energy
-    else if (hour >= 18 && hour < 22) {
-      suggestedEnergyLevel = 'low';
-      suggestedCategoryId = 2; // Ocio
-    }
-    // Night (22+) = low energy, Bienestar
-    else if (hour >= 22 || hour < 6) {
-      suggestedEnergyLevel = 'low';
-      suggestedCategoryId = 4; // Bienestar
-      suggestedPriority = 'someday';
+    for (const rule of SUGGESTION_RULES) {
+      if (rule.matches(context)) {
+        Object.assign(suggestion, rule.apply);
+      }
     }
 
     return {
-      category_id: suggestedCategoryId,
-      priority: suggestedPriority,
-      energy_level: suggestedEnergyLevel,
-      context_ids: activeContexts?.map((c) => c.id) || [],
+      ...suggestion,
+      context_ids: activeContexts.map((contextItem) => contextItem.id),
     };
   };
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   EditableBadge,
   EditableContexts,
@@ -10,6 +10,38 @@ import {
 import { useCategories } from '@/hooks/useCategories';
 import type { ActivityWithDetails, UpdateActivityRequest } from '@/lib/types';
 import { cn } from '@/lib/utils';
+
+const PRIORITY_LABELS = {
+  urgent: 'Urgente',
+  important: 'Importante',
+  someday: 'Algún día',
+} as const;
+
+const ENERGY_LABELS = {
+  low: 'Ligera',
+  medium: 'Moderada',
+  high: 'Intensa',
+} as const;
+
+const PRIORITY_OPTIONS: SelectOption[] = [
+  { value: 'urgent', label: 'Urgente' },
+  { value: 'important', label: 'Importante' },
+  { value: 'someday', label: 'Algún día' },
+];
+
+const ENERGY_OPTIONS: SelectOption[] = [
+  { value: 'low', label: 'Ligera' },
+  { value: 'medium', label: 'Moderada' },
+  { value: 'high', label: 'Intensa' },
+];
+
+interface BadgeConfig {
+  key: string;
+  value: string | number;
+  options: SelectOption[];
+  onSave: (value: string | number) => Promise<void>;
+  displayFormatter: (value: string | number) => string;
+}
 
 interface ActivityCardProps {
   activity: ActivityWithDetails;
@@ -42,41 +74,51 @@ export function ActivityCard({
     }
   }, [isOpen]);
 
-  const priorityLabels = {
-    urgent: 'Urgente',
-    important: 'Importante',
-    someday: 'Algún día',
-  };
-
-  const energyLabels = {
-    low: 'Ligera',
-    medium: 'Moderada',
-    high: 'Intensa',
-  };
-
-  // Options for selects
-  const priorityOptions: SelectOption[] = [
-    { value: 'urgent', label: 'Urgente' },
-    { value: 'important', label: 'Importante' },
-    { value: 'someday', label: 'Algún día' },
-  ];
-
-  const energyOptions: SelectOption[] = [
-    { value: 'low', label: 'Ligera' },
-    { value: 'medium', label: 'Moderada' },
-    { value: 'high', label: 'Intensa' },
-  ];
-
-  const categoryOptions: SelectOption[] = categories.map((cat) => ({
-    value: cat.id,
-    label: cat.name,
-  }));
+  const categoryOptions = useMemo<SelectOption[]>(
+    () => categories.map((cat) => ({ value: cat.id, label: cat.name })),
+    [categories]
+  );
 
   // Helper to update a field
   const updateField = async (field: string, value: unknown) => {
     if (!onUpdate) return;
     await onUpdate(activity.id, { [field]: value });
   };
+
+  const handleEditComplete = () => setIsEditMode(false);
+
+  const badgeConfigs: BadgeConfig[] = [
+    ...(activity.category
+      ? [
+          {
+            key: 'category',
+            value: activity.category_id ?? 0,
+            options: categoryOptions,
+            onSave: (value: string | number) => updateField('category_id', value),
+            displayFormatter: (value: string | number) => {
+              const cat = categories.find((category) => category.id === Number(value));
+              return cat?.name || '';
+            },
+          },
+        ]
+      : []),
+    {
+      key: 'priority',
+      value: activity.priority,
+      options: PRIORITY_OPTIONS,
+      onSave: (value: string | number) => updateField('priority', value),
+      displayFormatter: (value: string | number) =>
+        PRIORITY_LABELS[value as keyof typeof PRIORITY_LABELS],
+    },
+    {
+      key: 'energy',
+      value: activity.energy_level || 'medium',
+      options: ENERGY_OPTIONS,
+      onSave: (value: string | number) => updateField('energy_level', value),
+      displayFormatter: (value: string | number) =>
+        ENERGY_LABELS[value as keyof typeof ENERGY_LABELS] || 'Añadir energía',
+    },
+  ];
 
   return (
     <details
@@ -98,7 +140,7 @@ export function ActivityCard({
             onSave={(value) => updateField('title', value)}
             placeholder="Sin título"
             isEditMode={isEditMode}
-            onEditComplete={() => setIsEditMode(false)}
+            onEditComplete={handleEditComplete}
             className={cn(
               'w-full text-base font-medium',
               isCompleted ? 'text-neutral-500 line-through' : 'text-neutral-100'
@@ -180,42 +222,17 @@ export function ActivityCard({
       <div className="mt-3" key={isOpen ? 'open' : 'closed'}>
         {/* Metadata - Editable */}
         <div className="flex flex-wrap items-center gap-2 mb-2">
-          {/* Category */}
-          {activity.category && (
+          {badgeConfigs.map((badge) => (
             <EditableBadge
-              value={activity.category_id || 0}
-              options={categoryOptions}
-              onSave={(value) => updateField('category_id', value)}
-              displayFormatter={(value) => {
-                const cat = categories.find((c) => c.id === value);
-                return cat?.name || '';
-              }}
+              key={badge.key}
+              value={badge.value}
+              options={badge.options}
+              onSave={badge.onSave}
+              displayFormatter={badge.displayFormatter}
               isEditMode={isEditMode}
-              onEditComplete={() => setIsEditMode(false)}
+              onEditComplete={handleEditComplete}
             />
-          )}
-
-          {/* Priority */}
-          <EditableBadge
-            value={activity.priority}
-            options={priorityOptions}
-            onSave={(value) => updateField('priority', value)}
-            displayFormatter={(value) => priorityLabels[value as keyof typeof priorityLabels]}
-            isEditMode={isEditMode}
-            onEditComplete={() => setIsEditMode(false)}
-          />
-
-          {/* Energy Level */}
-          <EditableBadge
-            value={activity.energy_level || 'medium'}
-            options={energyOptions}
-            onSave={(value) => updateField('energy_level', value)}
-            displayFormatter={(value) =>
-              energyLabels[value as keyof typeof energyLabels] || 'Añadir energía'
-            }
-            isEditMode={isEditMode}
-            onEditComplete={() => setIsEditMode(false)}
-          />
+          ))}
         </div>
 
         {/* Contexts - Editable */}
