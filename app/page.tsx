@@ -17,12 +17,14 @@ export default function Home() {
   const { createActivity } = useActivities();
 
   return (
-    <div className="min-h-screen bg-neutral-950 p-4 md:p-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-neutral-50 p-4 transition-colors duration-300 dark:bg-neutral-950 md:p-8">
+      <div className="mx-auto max-w-4xl">
         {/* Header */}
         <header className="mb-8">
-          <h1 className="text-3xl font-bold text-neutral-100 mb-2">¿Qué sigue?</h1>
-          <p className="text-neutral-400 text-sm">
+          <h1 className="mb-2 text-3xl font-bold text-neutral-900 dark:text-neutral-100">
+            ¿Qué sigue?
+          </h1>
+          <p className="text-sm text-neutral-600 dark:text-neutral-400">
             Actividades inteligentes según tu momento del día
           </p>
         </header>

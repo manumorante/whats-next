@@ -176,6 +176,10 @@ function describeActivityStatus(
         const dayMatches = !slot.day_of_week || slot.day_of_week === currentDayName;
         const crossesMidnight = slot.time_end < slot.time_start;
 
+        if (!dayMatches) {
+          return false;
+        }
+
         if (crossesMidnight) {
           return currentTime >= slot.time_start || currentTime <= slot.time_end;
         }
