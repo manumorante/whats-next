@@ -17,7 +17,7 @@ export default function Home() {
 
   return (
     <div className="min-h-[100svh] bg-neutral-50 transition-colors duration-300 dark:bg-neutral-950">
-      <div className="mx-auto flex min-h-[100svh] w-full max-w-3xl flex-col gap-10 px-6 pb-20 pt-8">
+      <div className="mx-auto flex min-h-[100svh] w-full max-w-3xl flex-col gap-4 px-6 pb-20 pt-8">
         {/* Hero */}
         <header className="flex flex-col gap-3">
           <div className="flex gap-2 items-center">
@@ -28,11 +28,6 @@ export default function Home() {
 
           <CurrentTimeInfo />
         </header>
-
-        {/* Primary suggestion */}
-        <section className="space-y-6">
-          <SuggestionsList limit={1} category={selectedCategory} />
-        </section>
 
         {/* Quick Add */}
         <section className="space-y-4">
@@ -52,6 +47,11 @@ export default function Home() {
             selectedCategory={selectedCategory}
             onSelectCategory={setSelectedCategory}
           />
+        </section>
+
+        {/* Primary suggestion */}
+        <section className="space-y-6">
+          <SuggestionsList limit={1} category={selectedCategory} />
         </section>
 
         {/* Secondary content */}
