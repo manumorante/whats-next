@@ -6,7 +6,7 @@ import {
   getActiveContexts,
   getContexts,
   updateContext,
-} from '@/lib/contexts';
+} from '@/services/contexts';
 
 // GET /api/contexts - Get all contexts or active contexts
 export async function GET(request: NextRequest) {

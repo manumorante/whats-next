@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import useSWR from 'swr';
-import { contextsApi } from '@/lib/api';
 
 /**
  * Hook to manage contexts with SWR
  */
 export function useContexts() {
-  const { data, error, isLoading, mutate } = useSWR('contexts', contextsApi.getAll);
+  const { data, error, isLoading, mutate } = useSWR('contexts', async () => {
+    const response = await fetch('/api/contexts');
+    if (!response.ok) throw new Error('Failed to fetch contexts');
+    return response.json();
+  });
 
   const [mutatingId, setMutatingId] = useState<number | null>(null);
 
@@ -20,9 +23,14 @@ export function useContexts() {
     time_start?: string,
     time_end?: string
   ) => {
-    const result = await contextsApi.create(name, label, days, time_start, time_end);
-    await mutate(); // Revalidate
-    return result;
+    const response = await fetch('/api/contexts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, label, days, time_start, time_end }),
+    });
+    if (!response.ok) throw new Error('Failed to create context');
+    await mutate();
+    return response.json();
   };
 
   /**
@@ -40,23 +48,13 @@ export function useContexts() {
   ) => {
     setMutatingId(id);
     try {
-      // Optimistic update
-      await mutate(
-        (currentData) => {
-          if (!currentData) return currentData;
-
-          return currentData.map((context) =>
-            context.id === id ? { ...context, ...data } : context
-          );
-        },
-        { revalidate: false }
-      );
-
-      await contextsApi.update(id, data);
-      await mutate(); // Revalidate
-    } catch (error) {
-      await mutate(); // Rollback
-      throw error;
+      const response = await fetch(`/api/contexts?id=${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Failed to update context');
+      await mutate();
     } finally {
       setMutatingId(null);
     }
@@ -68,16 +66,9 @@ export function useContexts() {
   const deleteContext = async (id: number) => {
     setMutatingId(id);
     try {
-      // Optimistic update
-      await mutate((currentData) => currentData?.filter((context) => context.id !== id), {
-        revalidate: false,
-      });
-
-      await contextsApi.delete(id);
-      await mutate(); // Revalidate
-    } catch (error) {
-      await mutate(); // Rollback
-      throw error;
+      const response = await fetch(`/api/contexts?id=${id}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error('Failed to delete context');
+      await mutate();
     } finally {
       setMutatingId(null);
     }
@@ -99,7 +90,11 @@ export function useContexts() {
  * Hook to get active contexts (for current time)
  */
 export function useActiveContexts() {
-  const { data, error, isLoading, mutate } = useSWR('contexts:active', contextsApi.getActive, {
+  const { data, error, isLoading, mutate } = useSWR('contexts:active', async () => {
+    const response = await fetch('/api/contexts?active=true');
+    if (!response.ok) throw new Error('Failed to fetch active contexts');
+    return response.json();
+  }, {
     refreshInterval: 60000, // Refresh every minute
   });
 

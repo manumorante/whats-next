@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Badge } from '@/components/Badge';
-import { contextsApi } from '@/lib/api';
 import type { ContextParsed } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
@@ -34,7 +33,10 @@ export function EditableContexts({
 
   // Load all contexts
   useEffect(() => {
-    contextsApi.getAll().then(setAllContexts).catch(console.error);
+    fetch('/api/contexts')
+      .then(res => res.json())
+      .then(setAllContexts)
+      .catch(console.error);
   }, []);
 
   // Sync temp selected with props when entering edit mode

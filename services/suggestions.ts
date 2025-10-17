@@ -1,5 +1,5 @@
-import { getActivities } from '@/lib/activities';
-import { getActiveContexts } from '@/lib/contexts';
+import { getActivities } from '@/services/activities';
+import { getActiveContexts } from '@/services/contexts';
 import type { ActivitySuggestion, ActivityWithDetails, Priority } from '@/lib/types';
 
 // ==================================================

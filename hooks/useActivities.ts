@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import useSWR, { mutate as globalMutate } from 'swr';
-import { activitiesApi } from '@/lib/api';
 import type {
   CreateActivityRequest,
   GetActivitiesFilters,
@@ -9,12 +8,22 @@ import type {
 
 /**
  * Hook to manage activities with SWR
- * Provides CRUD operations with optimistic updates
+ * Provides CRUD operations
  */
 export function useActivities(filters?: GetActivitiesFilters) {
   const cacheKey = ['activities', filters];
 
-  const { data, error, isLoading, mutate } = useSWR(cacheKey, () => activitiesApi.getAll(filters));
+  const { data, error, isLoading, mutate } = useSWR(cacheKey, async () => {
+    const params = new URLSearchParams();
+    if (filters?.category_id) params.set('category_id', filters.category_id.toString());
+    if (filters?.priority) params.set('priority', filters.priority);
+    if (filters?.energy_level) params.set('energy_level', filters.energy_level);
+    if (filters?.is_completed !== undefined) params.set('is_completed', filters.is_completed.toString());
+    
+    const response = await fetch(`/api/activities?${params.toString()}`);
+    if (!response.ok) throw new Error('Failed to fetch activities');
+    return response.json();
+  });
 
   const [mutatingId, setMutatingId] = useState<number | null>(null);
 
@@ -22,50 +31,29 @@ export function useActivities(filters?: GetActivitiesFilters) {
    * Create a new activity
    */
   const createActivity = async (data: CreateActivityRequest) => {
-    const result = await activitiesApi.create(data);
-    await mutate(); // Revalidate data
-    return result;
+    const response = await fetch('/api/activities', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error('Failed to create activity');
+    await mutate();
+    return response.json();
   };
 
   /**
-   * Update an existing activity with optimistic update
+   * Update an existing activity
    */
   const updateActivity = async (id: number, data: UpdateActivityRequest) => {
     setMutatingId(id);
     try {
-      // Optimistic update for activities cache
-      await mutate(
-        (currentData) => {
-          if (!currentData) return currentData;
-          return currentData.map((activity) => {
-            if (activity.id !== id) return activity;
-
-            // Only update simple fields, skip complex relations
-            const updated = { ...activity };
-            if (data.title !== undefined) updated.title = data.title ?? '';
-            if (data.description !== undefined) updated.description = data.description ?? null;
-            if (data.category_id !== undefined) updated.category_id = data.category_id ?? null;
-            if (data.priority !== undefined) updated.priority = data.priority;
-            if (data.energy_level !== undefined) updated.energy_level = data.energy_level ?? null;
-
-            return updated;
-          });
-        },
-        { revalidate: false }
-      );
-
-      // Call API
-      await activitiesApi.update(id, data);
-
-      // Revalidate activities cache
+      const response = await fetch(`/api/activities?id=${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Failed to update activity');
       await mutate();
-
-      // Also revalidate suggestions cache globally (they depend on activities)
-      await globalMutate((key) => Array.isArray(key) && key[0] === 'suggestions');
-    } catch (error) {
-      await mutate(); // Rollback on error
-      await globalMutate((key) => Array.isArray(key) && key[0] === 'suggestions');
-      throw error;
     } finally {
       setMutatingId(null);
     }
@@ -77,16 +65,9 @@ export function useActivities(filters?: GetActivitiesFilters) {
   const deleteActivity = async (id: number) => {
     setMutatingId(id);
     try {
-      // Optimistic update
-      await mutate((currentData) => currentData?.filter((activity) => activity.id !== id), {
-        revalidate: false,
-      });
-
-      await activitiesApi.delete(id);
-      await mutate(); // Revalidate
-    } catch (error) {
-      await mutate(); // Rollback on error
-      throw error;
+      const response = await fetch(`/api/activities?id=${id}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error('Failed to delete activity');
+      await mutate();
     } finally {
       setMutatingId(null);
     }
@@ -98,25 +79,9 @@ export function useActivities(filters?: GetActivitiesFilters) {
   const toggleActivity = async (id: number) => {
     setMutatingId(id);
     try {
-      // Optimistic update
-      await mutate(
-        (currentData) => {
-          if (!currentData) return currentData;
-
-          return currentData.map((activity) =>
-            activity.id === id
-              ? { ...activity, is_completed: activity.is_completed === 1 ? 0 : 1 }
-              : activity
-          );
-        },
-        { revalidate: false }
-      );
-
-      await activitiesApi.toggle(id);
-      await mutate(); // Revalidate
-    } catch (error) {
-      await mutate(); // Rollback on error
-      throw error;
+      const response = await fetch(`/api/activities/${id}/toggle`, { method: 'POST' });
+      if (!response.ok) throw new Error('Failed to toggle activity');
+      await mutate();
     } finally {
       setMutatingId(null);
     }

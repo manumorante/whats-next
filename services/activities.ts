@@ -1,6 +1,5 @@
 import { db } from '@/lib/db';
 import type {
-  ActivityCompletion,
   ActivityWithDetails,
   CreateActivityRequest,
   GetActivitiesFilters,

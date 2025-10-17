@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { toggleActivity } from '@/lib/activities';
+import { toggleActivity } from '@/services/activities';
 
 // POST /api/activities/[id]/toggle - Toggle activity completion
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { updateActivity } from '@/lib/activities';
+import { updateActivity } from '@/services/activities';
 import * as dbModule from '@/lib/db';
 
 // Mock the database

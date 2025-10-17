@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { getSuggestedActivities } from '@/lib/suggestions';
+import { getSuggestedActivities } from '@/services/suggestions';
 
 // GET /api/suggestions - Get suggested activities for current time
 export async function GET(request: NextRequest) {

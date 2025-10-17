@@ -2,11 +2,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ActivityWithDetails, Priority } from '@/lib/types';
 
 // Mock the dependencies
-vi.mock('@/lib/activities', () => ({
+vi.mock('@/services/activities', () => ({
   getActivities: vi.fn(),
 }));
 
-vi.mock('@/lib/contexts', () => ({
+vi.mock('@/services/contexts', () => ({
   getActiveContexts: vi.fn(),
 }));
 

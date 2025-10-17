@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import useSWR from 'swr';
-import { categoriesApi } from '@/lib/api';
 
 /**
  * Hook to manage categories with SWR
  */
 export function useCategories() {
-  const { data, error, isLoading, mutate } = useSWR('categories', categoriesApi.getAll);
+  const { data, error, isLoading, mutate } = useSWR('categories', async () => {
+    const response = await fetch('/api/categories');
+    if (!response.ok) throw new Error('Failed to fetch categories');
+    return response.json();
+  });
 
   const [mutatingId, setMutatingId] = useState<number | null>(null);
 
@@ -14,9 +17,14 @@ export function useCategories() {
    * Create a new category
    */
   const createCategory = async (name: string, color: string, icon?: string) => {
-    const result = await categoriesApi.create(name, color, icon);
-    await mutate(); // Revalidate
-    return result;
+    const response = await fetch('/api/categories', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, color, icon }),
+    });
+    if (!response.ok) throw new Error('Failed to create category');
+    await mutate();
+    return response.json();
   };
 
   /**
@@ -28,23 +36,13 @@ export function useCategories() {
   ) => {
     setMutatingId(id);
     try {
-      // Optimistic update
-      await mutate(
-        (currentData) => {
-          if (!currentData) return currentData;
-
-          return currentData.map((category) =>
-            category.id === id ? { ...category, ...data } : category
-          );
-        },
-        { revalidate: false }
-      );
-
-      await categoriesApi.update(id, data);
-      await mutate(); // Revalidate
-    } catch (error) {
-      await mutate(); // Rollback
-      throw error;
+      const response = await fetch(`/api/categories?id=${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Failed to update category');
+      await mutate();
     } finally {
       setMutatingId(null);
     }
@@ -56,16 +54,9 @@ export function useCategories() {
   const deleteCategory = async (id: number) => {
     setMutatingId(id);
     try {
-      // Optimistic update
-      await mutate((currentData) => currentData?.filter((category) => category.id !== id), {
-        revalidate: false,
-      });
-
-      await categoriesApi.delete(id);
-      await mutate(); // Revalidate
-    } catch (error) {
-      await mutate(); // Rollback
-      throw error;
+      const response = await fetch(`/api/categories?id=${id}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error('Failed to delete category');
+      await mutate();
     } finally {
       setMutatingId(null);
     }

@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { createActivity, deleteActivity, getActivities, updateActivity } from '@/lib/activities';
+import { createActivity, deleteActivity, getActivities, updateActivity } from '@/services/activities';
 import type {
   CreateActivityRequest,
   GetActivitiesFilters,

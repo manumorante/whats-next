@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { createCategory, deleteCategory, getCategories, updateCategory } from '@/lib/categories';
+import { createCategory, deleteCategory, getCategories, updateCategory } from '@/services/categories';
 
 // GET /api/categories - Get all categories
 export async function GET() {
