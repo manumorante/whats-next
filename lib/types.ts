@@ -33,6 +33,21 @@ export type EnergyLevel = 'low' | 'medium' | 'high';
 export type Priority = 'urgent' | 'important' | 'someday';
 export type DayOfWeek = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun';
 
+// ==================================================
+// CONSTANTS FOR UI DISPLAY
+// ==================================================
+export const ENERGY_LEVEL_OPTIONS = [
+  { value: 'low' as const, label: 'Ligera' },
+  { value: 'medium' as const, label: 'Moderada' },
+  { value: 'high' as const, label: 'Intensa' },
+] as const;
+
+export const PRIORITY_OPTIONS = [
+  { value: 'urgent' as const, label: 'Urgente' },
+  { value: 'important' as const, label: 'Importante' },
+  { value: 'someday' as const, label: 'Algún día' },
+] as const;
+
 export interface Activity {
   id: number;
   title: string;

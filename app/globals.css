@@ -2,9 +2,3 @@
 
 /* biome-ignore lint/suspicious/noUnknownAtRules: Tailwind custom variant */
 @custom-variant dark (&:where(.dark, .dark *));
-
-/* biome-ignore lint/suspicious/noUnknownAtRules: Tailwind theme directive */
-@theme {
-  --text-hero-title: clamp(var(--text-3xl), 12vw, var(--text-6xl));
-  --text-hero-display: clamp(var(--text-4xl), 18vw, var(--text-7xl));
-}

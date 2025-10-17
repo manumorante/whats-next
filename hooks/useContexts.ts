@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import useSWR from 'swr';
+import type { ContextParsed } from '@/lib/types';
 
 /**
  * Hook to manage contexts with SWR
  */
 export function useContexts() {
-  const { data, error, isLoading, mutate } = useSWR('contexts', async () => {
+  const { data, error, isLoading, mutate } = useSWR<ContextParsed[]>('contexts', async () => {
     const response = await fetch('/api/contexts');
     if (!response.ok) throw new Error('Failed to fetch contexts');
     return response.json();
@@ -90,13 +91,17 @@ export function useContexts() {
  * Hook to get active contexts (for current time)
  */
 export function useActiveContexts() {
-  const { data, error, isLoading, mutate } = useSWR('contexts:active', async () => {
-    const response = await fetch('/api/contexts?active=true');
-    if (!response.ok) throw new Error('Failed to fetch active contexts');
-    return response.json();
-  }, {
-    refreshInterval: 60000, // Refresh every minute
-  });
+  const { data, error, isLoading, mutate } = useSWR<ContextParsed[]>(
+    'contexts:active',
+    async () => {
+      const response = await fetch('/api/contexts?active=true');
+      if (!response.ok) throw new Error('Failed to fetch active contexts');
+      return response.json();
+    },
+    {
+      refreshInterval: 60000, // Refresh every minute
+    }
+  );
 
   return {
     activeContexts: data ?? [],

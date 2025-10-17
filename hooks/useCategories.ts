@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import useSWR from 'swr';
+import type { Category } from '@/lib/types';
 
 /**
  * Hook to manage categories with SWR
  */
 export function useCategories() {
-  const { data, error, isLoading, mutate } = useSWR('categories', async () => {
+  const { data, error, isLoading, mutate } = useSWR<Category[]>('categories', async () => {
     const response = await fetch('/api/categories');
     if (!response.ok) throw new Error('Failed to fetch categories');
     return response.json();

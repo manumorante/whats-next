@@ -31,19 +31,19 @@ describe('Categories Service', () => {
       const mockDbResult = {
         rows: [
           {
-            id: 2,
-            name: 'Z Category',
-            color: '#ff0000',
-            icon: 'z-icon',
-            created_at: '2023-01-02',
-            length: 5,
-          },
-          {
             id: 1,
             name: 'A Category',
             color: '#00ff00',
             icon: 'a-icon',
             created_at: '2023-01-01',
+            length: 5,
+          },
+          {
+            id: 2,
+            name: 'Z Category',
+            color: '#ff0000',
+            icon: 'z-icon',
+            created_at: '2023-01-02',
             length: 5,
           },
         ],
@@ -276,7 +276,7 @@ describe('Categories Service', () => {
         toJSON: () => ({}),
       });
 
-      await updateCategory(1, { icon: undefined });
+      await updateCategory(1, { icon: null });
 
       expect(vi.mocked(db.execute)).toHaveBeenCalledWith({
         sql: 'UPDATE categories SET icon = ? WHERE id = ?',

@@ -11,23 +11,20 @@ import type {
   ContextParsed,
   GetActivitiesFilters,
 } from '@/lib/types';
-import { cn } from '@/lib/utils';
 
 interface AllActivitiesListProps {
   category?: number;
 }
 
 export function AllActivitiesList({ category }: AllActivitiesListProps) {
-  const [showCompleted, setShowCompleted] = useState(false);
   const [expandedActivityId, setExpandedActivityId] = useState<number | null>(null);
 
   const filters: GetActivitiesFilters = {
     category_id: category,
-    is_completed: showCompleted ? undefined : false,
+    is_completed: false,
   };
 
-  const { activities, isLoading, error, toggleActivity, updateActivity, mutatingId } =
-    useActivities(filters);
+  const { activities, isLoading, error, updateActivity, mutatingId } = useActivities(filters);
   const { activeContexts } = useActiveContexts();
 
   if (isLoading) {
@@ -51,95 +48,43 @@ export function AllActivitiesList({ category }: AllActivitiesListProps) {
     );
   }
 
-  // Agrupar actividades por estado
-  const activeActivities = activities.filter((a) => a.is_completed === 0);
-  const completedActivities = activities.filter((a) => a.is_completed === 1);
   const now = new Date();
 
   return (
     <div className="space-y-4">
-      {/* Toggle para mostrar completadas */}
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-neutral-600 dark:text-neutral-400">
-          {activeActivities.length} activa{activeActivities.length !== 1 ? 's' : ''}
-          {completedActivities.length > 0 &&
-            ` · ${completedActivities.length} completada${completedActivities.length !== 1 ? 's' : ''}`}
-        </div>
+      {/* Lista de actividades */}
+      <div className="space-y-3">
+        {activities.map((activity) => {
+          const reasons = describeActivityStatus(activity, activeContexts, now);
+          const isExpanded = expandedActivityId === activity.id;
 
-        <button
-          type="button"
-          onClick={() => setShowCompleted(!showCompleted)}
-          className={cn(
-            'px-3 py-1 text-xs rounded-full transition-all',
-            showCompleted
-              ? 'bg-neutral-900 text-white dark:bg-neutral-700 dark:text-neutral-200'
-              : 'bg-neutral-200 text-neutral-600 hover:bg-neutral-300 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700'
-          )}
-        >
-          {showCompleted ? 'Ocultar completadas' : 'Mostrar completadas'}
-        </button>
-      </div>
-
-      {/* Lista de actividades activas */}
-      {activeActivities.length > 0 && (
-        <div className="space-y-3">
-          <h3 className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-            Activas
-            {activeContexts.length > 0 && (
-              <span className="ml-2 text-xs text-neutral-500 font-normal">
-                Contextos activos ahora: {activeContexts.map((c) => c.label).join(', ')}
-              </span>
-            )}
-          </h3>
-          {activeActivities.map((activity) => {
-            const reasons = describeActivityStatus(activity, activeContexts, now);
-            const isExpanded = expandedActivityId === activity.id;
-
-            return (
-              <div key={activity.id} className="space-y-1">
-                <ActivityCard
-                  activity={activity}
-                  onToggle={toggleActivity}
-                  onUpdate={updateActivity}
-                  isMutating={mutatingId === activity.id}
-                />
-                <div className="pl-4 flex items-start gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setExpandedActivityId(isExpanded ? null : activity.id)}
-                    className="text-xs text-neutral-500 hover:text-neutral-400 transition-colors"
-                  >
-                    {isExpanded ? '▼' : '▶'} Debug
-                  </button>
-                  {isExpanded && (
-                    <div className="flex-1 text-xs text-neutral-500 dark:text-neutral-400 space-y-0.5">
-                      {reasons.map((reason) => (
-                        <div key={reason}>{reason}</div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+          return (
+            <div key={activity.id} className="space-y-1">
+              <ActivityCard
+                activity={activity}
+                onUpdate={updateActivity}
+                isMutating={mutatingId === activity.id}
+              />
+              <div className="pl-4 flex items-start gap-2">
+                <button
+                  type="button"
+                  onClick={() => setExpandedActivityId(isExpanded ? null : activity.id)}
+                  className="text-xs text-neutral-500 hover:text-neutral-400 transition-colors"
+                >
+                  {isExpanded ? '▼' : '▶'} Debug
+                </button>
+                {isExpanded && (
+                  <div className="flex-1 text-xs text-neutral-500 dark:text-neutral-400 space-y-0.5">
+                    {reasons.map((reason) => (
+                      <div key={reason}>{reason}</div>
+                    ))}
+                  </div>
+                )}
               </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Lista de actividades completadas (si están visibles) */}
-      {showCompleted && completedActivities.length > 0 && (
-        <div className="space-y-3">
-          <h3 className="text-sm font-medium text-neutral-500">Completadas</h3>
-          {completedActivities.map((activity) => (
-            <ActivityCard
-              key={activity.id}
-              activity={activity}
-              onToggle={toggleActivity}
-              onUpdate={updateActivity}
-              isMutating={mutatingId === activity.id}
-            />
-          ))}
-        </div>
-      )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
