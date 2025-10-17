@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useCategories } from '@/hooks/useCategories';
 import type { ActivityWithDetails, UpdateActivityRequest } from '@/lib/types';
-import { ENERGY_LEVEL_OPTIONS, PRIORITY_OPTIONS } from '@/lib/types';
+import { ENERGY_OPTIONS, PRIORITY_OPTIONS } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
 interface ActivityCardProps {
@@ -21,14 +21,13 @@ export function ActivityCard({
   onUpdate,
   isMutating = false,
 }: ActivityCardProps) {
-  const isCompleted = activity.is_completed === 1;
   const { categories } = useCategories();
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
     title: activity.title,
     category_id: activity.category_id,
     priority: activity.priority,
-    energy_level: activity.energy_level || 'medium',
+    energy: activity.energy || 2,
     contexts: activity.contexts?.map((c) => c.id) || [],
   });
 
@@ -52,7 +51,7 @@ export function ActivityCard({
         title: formData.title,
         category_id: formData.category_id,
         priority: formData.priority,
-        energy_level: formData.energy_level,
+        energy: formData.energy,
         contexts: formData.contexts,
       });
     } catch (error) {
@@ -66,9 +65,7 @@ export function ActivityCard({
     <div
       className={cn(
         'rounded-lg border p-4 space-y-4',
-        isCompleted
-          ? 'bg-neutral-100 border-neutral-200 opacity-70 dark:bg-neutral-800 dark:border-neutral-700'
-          : 'bg-white border-neutral-200 dark:bg-neutral-900 dark:border-neutral-700',
+        'bg-white border-neutral-200 dark:bg-neutral-900 dark:border-neutral-700',
         (isMutating || isSaving) && 'opacity-50 pointer-events-none'
       )}
     >
@@ -131,15 +128,15 @@ export function ActivityCard({
           </select>
         </div>
 
-        {/* Energy Level */}
+        {/* Energy */}
         <div>
           <select
             id={`energy-${activity.id}`}
-            value={formData.energy_level}
-            onChange={(e) => updateFormData('energy_level', e.target.value)}
+            value={formData.energy}
+            onChange={(e) => updateFormData('energy', Number(e.target.value))}
             className="w-full px-3 py-2 border rounded-md text-sm bg-white border-neutral-300 text-neutral-900 dark:bg-neutral-800 dark:border-neutral-600 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
-            {ENERGY_LEVEL_OPTIONS.map((option) => (
+            {ENERGY_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
@@ -180,6 +177,16 @@ export function ActivityCard({
           )}
         </div>
       </div>
+
+      {/* Score */}
+      {score !== undefined && (
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+            Puntuación
+          </span>
+          <span className="text-sm font-bold text-blue-600 dark:text-blue-400">{score} puntos</span>
+        </div>
+      )}
 
       {/* Reason (for suggestions) */}
       {reason && score !== undefined && (

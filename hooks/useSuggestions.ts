@@ -5,22 +5,25 @@ import type { ActivitySuggestion } from '@/lib/types';
  * Hook to get activity suggestions for the current time
  */
 export function useSuggestions(limit = 10, category?: number) {
-  const cacheKey = ['suggestions', limit, category];
+  const params = new URLSearchParams();
+  params.set('limit', limit.toString());
+  if (category) params.set('category', category.toString());
+
+  const url = `/api/suggestions?${params.toString()}`;
 
   const { data, error, isLoading, mutate } = useSWR<ActivitySuggestion[]>(
-    cacheKey,
+    url,
     async () => {
-      const params = new URLSearchParams();
-      params.set('limit', limit.toString());
-      if (category) params.set('category', category.toString());
-
-      const response = await fetch(`/api/suggestions?${params.toString()}`);
+      const response = await fetch(url);
       if (!response.ok) throw new Error('Failed to fetch suggestions');
       return response.json();
     },
     {
-      refreshInterval: 30000, // Refresh every 30 seconds
-      revalidateOnFocus: true, // Revalidate when window gets focus
+      revalidateOnMount: true,
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true,
+      dedupingInterval: 0, // No deduplication
+      refreshInterval: 0, // No automatic refresh
     }
   );
 

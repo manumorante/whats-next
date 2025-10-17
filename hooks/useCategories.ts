@@ -6,11 +6,23 @@ import type { Category } from '@/lib/types';
  * Hook to manage categories with SWR
  */
 export function useCategories() {
-  const { data, error, isLoading, mutate } = useSWR<Category[]>('categories', async () => {
-    const response = await fetch('/api/categories');
-    if (!response.ok) throw new Error('Failed to fetch categories');
-    return response.json();
-  });
+  const url = '/api/categories';
+
+  const { data, error, isLoading, mutate } = useSWR<Category[]>(
+    url,
+    async () => {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Failed to fetch categories');
+      return response.json();
+    },
+    {
+      revalidateOnMount: true,
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true,
+      dedupingInterval: 0, // No deduplication
+      refreshInterval: 0, // No automatic refresh
+    }
+  );
 
   const [mutatingId, setMutatingId] = useState<number | null>(null);
 

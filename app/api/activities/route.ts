@@ -1,11 +1,16 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { createActivity, deleteActivity, getActivities, updateActivity } from '@/services/activities';
 import type {
   CreateActivityRequest,
   GetActivitiesFilters,
   UpdateActivityRequest,
 } from '@/lib/types';
+import {
+  createActivity,
+  deleteActivity,
+  getActivities,
+  updateActivity,
+} from '@/services/activities';
 
 // GET /api/activities - Get all activities with optional filters
 export async function GET(request: NextRequest) {
@@ -20,16 +25,12 @@ export async function GET(request: NextRequest) {
 
     if (searchParams.has('priority')) {
       const priority = searchParams.get('priority');
-      if (priority) filters.priority = priority as GetActivitiesFilters['priority'];
+      if (priority) filters.priority = Number(priority) as GetActivitiesFilters['priority'];
     }
 
-    if (searchParams.has('energy_level')) {
-      const energyLevel = searchParams.get('energy_level');
-      if (energyLevel) filters.energy_level = energyLevel as GetActivitiesFilters['energy_level'];
-    }
-
-    if (searchParams.has('is_completed')) {
-      filters.is_completed = searchParams.get('is_completed') === 'true';
+    if (searchParams.has('energy')) {
+      const energy = searchParams.get('energy');
+      if (energy) filters.energy = Number(energy) as GetActivitiesFilters['energy'];
     }
 
     const activities = await getActivities(filters);

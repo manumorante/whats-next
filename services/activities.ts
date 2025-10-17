@@ -1,8 +1,11 @@
 import { db } from '@/lib/db';
 import type {
+  ActivityCompletion,
   ActivityWithDetails,
   CreateActivityRequest,
+  Energy,
   GetActivitiesFilters,
+  Priority,
   UpdateActivityRequest,
 } from '@/lib/types';
 
@@ -13,9 +16,14 @@ export async function getActivities(
   filters?: GetActivitiesFilters
 ): Promise<ActivityWithDetails[]> {
   let sql = `
-    SELECT 
-      a.*,
-      c.id as category_id,
+    SELECT
+      a.id,
+      a.title,
+      a.description,
+      a.category_id,
+      a.energy,
+      a.priority,
+      a.created_at,
       c.name as category_name,
       c.color as category_color,
       c.icon as category_icon,
@@ -39,14 +47,9 @@ export async function getActivities(
     args.push(filters.priority);
   }
 
-  if (filters?.energy_level) {
-    conditions.push('a.energy_level = ?');
-    args.push(filters.energy_level);
-  }
-
-  if (filters?.is_completed !== undefined) {
-    conditions.push('a.is_completed = ?');
-    args.push(filters.is_completed ? 1 : 0);
+  if (filters?.energy) {
+    conditions.push('a.energy = ?');
+    args.push(filters.energy);
   }
 
   if (conditions.length > 0) {
@@ -65,9 +68,8 @@ export async function getActivities(
       title: row.title as string,
       description: row.description as string | null,
       category_id: row.category_id as number | null,
-      energy_level: row.energy_level as string | null as ActivityWithDetails['energy_level'],
-      priority: row.priority as string as ActivityWithDetails['priority'],
-      is_completed: row.is_completed as number,
+      energy: row.energy as Energy | null,
+      priority: row.priority as Priority,
       created_at: row.created_at as string,
       completions_count: row.completions_count as number,
       last_completed: row.last_completed as string | null,
@@ -105,19 +107,6 @@ export async function getActivities(
     }));
 
     // Get time slots for this activity
-    const timeSlotsResult = await db.execute({
-      sql: 'SELECT * FROM activity_time_slots WHERE activity_id = ?',
-      args: [activity.id],
-    });
-
-    activity.time_slots = timeSlotsResult.rows.map((slot) => ({
-      id: slot.id as number,
-      activity_id: slot.activity_id as number,
-      day_of_week: slot.day_of_week as 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun' | null,
-      time_start: slot.time_start as string,
-      time_end: slot.time_end as string,
-    }));
-
     activities.push(activity);
   }
 
@@ -125,8 +114,42 @@ export async function getActivities(
 }
 
 // ==================================================
-// GET ACTIVITY BY ID
+// TEST FUNCTION
 // ==================================================
+export async function testGetActivities(): Promise<{
+  success: boolean;
+  count: number;
+  activities: Array<{
+    id: number;
+    title: string;
+    energy: number;
+    priority: number;
+  }>;
+}> {
+  try {
+    console.log('Testing getActivities...');
+
+    const result = await db.execute({
+      sql: 'SELECT id, title, energy, priority FROM activities LIMIT 3',
+    });
+
+    console.log('Raw result:', result.rows);
+
+    return {
+      success: true,
+      count: result.rows.length,
+      activities: result.rows.map((row) => ({
+        id: row.id as number,
+        title: row.title as string,
+        energy: row.energy as number,
+        priority: row.priority as number,
+      })),
+    };
+  } catch (error) {
+    console.error('Error in testGetActivities:', error);
+    throw error;
+  }
+}
 export async function getActivityById(id: number): Promise<ActivityWithDetails | null> {
   const activities = await getActivities();
   return activities.find((a) => a.id === id) || null;
@@ -141,15 +164,15 @@ export async function createActivity(data: CreateActivityRequest): Promise<numbe
     sql: `
       INSERT INTO activities (
         title, description, category_id,
-        energy_level, priority
+        energy, priority
       ) VALUES (?, ?, ?, ?, ?)
     `,
     args: [
       data.title.trim(),
       data.description || null,
       data.category_id || null,
-      data.energy_level || null,
-      data.priority || 'someday',
+      data.energy || null,
+      data.priority || 3,
     ],
   });
 
@@ -161,19 +184,6 @@ export async function createActivity(data: CreateActivityRequest): Promise<numbe
       await db.execute({
         sql: 'INSERT INTO activity_contexts (activity_id, context_id) VALUES (?, ?)',
         args: [activityId, contextId],
-      });
-    }
-  }
-
-  // Insert time slots if provided
-  if (data.time_slots && data.time_slots.length > 0) {
-    for (const slot of data.time_slots) {
-      await db.execute({
-        sql: `
-          INSERT INTO activity_time_slots (activity_id, day_of_week, time_start, time_end)
-          VALUES (?, ?, ?, ?)
-        `,
-        args: [activityId, slot.day_of_week || null, slot.time_start, slot.time_end],
       });
     }
   }
@@ -203,19 +213,14 @@ export async function updateActivity(id: number, data: UpdateActivityRequest): P
     args.push(data.category_id || null);
   }
 
-  if (data.energy_level !== undefined) {
-    fields.push('energy_level = ?');
-    args.push(data.energy_level || null);
+  if (data.energy !== undefined) {
+    fields.push('energy = ?');
+    args.push(data.energy || null);
   }
 
   if (data.priority !== undefined) {
     fields.push('priority = ?');
     args.push(data.priority);
-  }
-
-  if (data.is_completed !== undefined) {
-    fields.push('is_completed = ?');
-    args.push(data.is_completed ? 1 : 0);
   }
 
   if (fields.length > 0) {
@@ -243,25 +248,7 @@ export async function updateActivity(id: number, data: UpdateActivityRequest): P
     }
   }
 
-  // Update time slots if provided
-  if (data.time_slots !== undefined) {
-    // Delete existing slots
-    await db.execute({
-      sql: 'DELETE FROM activity_time_slots WHERE activity_id = ?',
-      args: [id],
-    });
-
-    // Insert new slots
-    for (const slot of data.time_slots) {
-      await db.execute({
-        sql: `
-          INSERT INTO activity_time_slots (activity_id, day_of_week, time_start, time_end)
-          VALUES (?, ?, ?, ?)
-        `,
-        args: [id, slot.day_of_week || null, slot.time_start, slot.time_end],
-      });
-    }
-  }
+  // Los horarios ahora están dentro de los contextos, no en time_slots separados
 }
 
 // ==================================================
@@ -273,34 +260,6 @@ export async function deleteActivity(id: number): Promise<void> {
     args: [id],
   });
   // Note: Cascading deletes will handle related records
-}
-
-// ==================================================
-// TOGGLE ACTIVITY COMPLETION
-// ==================================================
-export async function toggleActivity(id: number): Promise<void> {
-  // Get current activity
-  const activity = await getActivityById(id);
-
-  if (!activity) {
-    throw new Error('Activity not found');
-  }
-
-  const newCompleted = activity.is_completed === 1 ? 0 : 1;
-
-  // Update completion status
-  await db.execute({
-    sql: 'UPDATE activities SET is_completed = ? WHERE id = ?',
-    args: [newCompleted, id],
-  });
-
-  // If marking as completed, add to completions
-  if (newCompleted === 1) {
-    await db.execute({
-      sql: 'INSERT INTO activity_completions (activity_id) VALUES (?)',
-      args: [id],
-    });
-  }
 }
 
 // ==================================================

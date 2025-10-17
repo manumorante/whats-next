@@ -1,21 +1,22 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { getSuggestedActivities } from '@/services/suggestions';
+import { getActiveContexts } from '@/services/contexts';
+import { getTopActivities } from '@/services/suggestions';
 
-// GET /api/suggestions - Get suggested activities for current time
+// GET /api/suggestions - Get top scored activities
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
 
     const limit = searchParams.has('limit') ? Number(searchParams.get('limit')) : 10;
 
-    const category = searchParams.has('category')
-      ? Number(searchParams.get('category'))
-      : undefined;
+    // Obtener contextos activos una sola vez
+    const activeContexts = await getActiveContexts();
 
-    const suggestions = await getSuggestedActivities(limit, category);
+    // Usar los contextos activos para calcular puntuaciones
+    const topActivities = await getTopActivities(activeContexts, limit);
 
-    return NextResponse.json(suggestions);
+    return NextResponse.json(topActivities);
   } catch (error) {
     console.error('Error getting suggestions:', error);
     return NextResponse.json({ error: 'Failed to get suggestions' }, { status: 500 });

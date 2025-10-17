@@ -29,23 +29,23 @@ export interface ContextParsed extends Omit<Context, 'days'> {
 // ==================================================
 // ACTIVITIES
 // ==================================================
-export type EnergyLevel = 'low' | 'medium' | 'high';
-export type Priority = 'urgent' | 'important' | 'someday';
+export type Energy = 1 | 2 | 3;
+export type Priority = 1 | 2 | 3;
 export type DayOfWeek = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun';
 
 // ==================================================
 // CONSTANTS FOR UI DISPLAY
 // ==================================================
-export const ENERGY_LEVEL_OPTIONS = [
-  { value: 'low' as const, label: 'Ligera' },
-  { value: 'medium' as const, label: 'Moderada' },
-  { value: 'high' as const, label: 'Intensa' },
+export const ENERGY_OPTIONS = [
+  { value: 1 as const, label: 'Baja energía' },
+  { value: 2 as const, label: 'Media energía' },
+  { value: 3 as const, label: 'Alta energía' },
 ] as const;
 
 export const PRIORITY_OPTIONS = [
-  { value: 'urgent' as const, label: 'Urgente' },
-  { value: 'important' as const, label: 'Importante' },
-  { value: 'someday' as const, label: 'Algún día' },
+  { value: 1 as const, label: 'Alta prioridad' },
+  { value: 2 as const, label: 'Media prioridad' },
+  { value: 3 as const, label: 'Baja prioridad' },
 ] as const;
 
 export interface Activity {
@@ -53,21 +53,9 @@ export interface Activity {
   title: string;
   description: string | null;
   category_id: number | null;
-  energy_level: EnergyLevel | null;
+  energy: Energy | null;
   priority: Priority;
-  is_completed: number; // 0 or 1
   created_at: string;
-}
-
-// ==================================================
-// ACTIVITY TIME SLOTS
-// ==================================================
-export interface ActivityTimeSlot {
-  id: number;
-  activity_id: number;
-  day_of_week: DayOfWeek | null;
-  time_start: string;
-  time_end: string;
 }
 
 // ==================================================
@@ -95,7 +83,6 @@ export interface ActivityCompletion {
 export interface ActivityWithDetails extends Activity {
   category?: Category;
   contexts?: ContextParsed[];
-  time_slots?: ActivityTimeSlot[];
   completions_count?: number;
   last_completed?: string | null;
   next_completion?: string | null; // For recurring activities
@@ -108,21 +95,18 @@ export interface CreateActivityRequest {
   title: string;
   description?: string;
   category_id?: number;
-  energy_level?: EnergyLevel;
+  energy?: Energy;
   priority?: Priority;
   contexts?: number[]; // Array of context IDs
-  time_slots?: Omit<ActivityTimeSlot, 'id' | 'activity_id'>[];
 }
 
 export interface UpdateActivityRequest {
   title?: string | null;
   description?: string | null;
   category_id?: number | null;
-  energy_level?: EnergyLevel | null;
+  energy?: Energy | null;
   priority?: Priority;
-  is_completed?: boolean;
   contexts?: number[]; // Array of context IDs
-  time_slots?: Omit<ActivityTimeSlot, 'id' | 'activity_id'>[];
 }
 
 export interface ActivitySuggestion {
@@ -134,6 +118,5 @@ export interface ActivitySuggestion {
 export interface GetActivitiesFilters {
   category_id?: number;
   priority?: Priority;
-  energy_level?: EnergyLevel;
-  is_completed?: boolean;
+  energy?: Energy;
 }

@@ -22,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className="antialiased min-h-screen bg-neutral-50 text-neutral-900 transition-colors duration-300 dark:bg-neutral-950 dark:text-neutral-100">
+      <body className="antialiased min-h-screen bg-zinc-100 text-neutral-900 transition-colors duration-300 dark:bg-zinc-900 dark:text-neutral-100">
         <div className="fixed right-4 top-4 z-50">
           <ThemeToggle />
         </div>

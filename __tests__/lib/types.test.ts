@@ -17,10 +17,10 @@ describe('Type Definitions', () => {
   });
 
   it('should validate Priority values', () => {
-    const validPriorities: Priority[] = ['urgent', 'important', 'someday'];
+    const validPriorities: Priority[] = [1, 2, 3];
 
     validPriorities.forEach((priority) => {
-      expect(['urgent', 'important', 'someday']).toContain(priority);
+      expect([1, 2, 3]).toContain(priority);
     });
   });
 
@@ -45,7 +45,7 @@ describe('Type Definitions', () => {
     const activity: Partial<ActivityWithDetails> = {
       id: 1,
       title: 'Test Activity',
-      priority: 'important',
+      priority: 2,
       energy_level: 'medium',
       is_completed: 0,
     };

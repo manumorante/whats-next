@@ -6,11 +6,23 @@ import type { ContextParsed } from '@/lib/types';
  * Hook to manage contexts with SWR
  */
 export function useContexts() {
-  const { data, error, isLoading, mutate } = useSWR<ContextParsed[]>('contexts', async () => {
-    const response = await fetch('/api/contexts');
-    if (!response.ok) throw new Error('Failed to fetch contexts');
-    return response.json();
-  });
+  const url = '/api/contexts';
+
+  const { data, error, isLoading, mutate } = useSWR<ContextParsed[]>(
+    url,
+    async () => {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Failed to fetch contexts');
+      return response.json();
+    },
+    {
+      revalidateOnMount: true,
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true,
+      dedupingInterval: 0, // No deduplication
+      refreshInterval: 0, // No automatic refresh
+    }
+  );
 
   const [mutatingId, setMutatingId] = useState<number | null>(null);
 
@@ -91,15 +103,21 @@ export function useContexts() {
  * Hook to get active contexts (for current time)
  */
 export function useActiveContexts() {
+  const url = '/api/contexts?active=true';
+
   const { data, error, isLoading, mutate } = useSWR<ContextParsed[]>(
-    'contexts:active',
+    url,
     async () => {
-      const response = await fetch('/api/contexts?active=true');
+      const response = await fetch(url);
       if (!response.ok) throw new Error('Failed to fetch active contexts');
       return response.json();
     },
     {
-      refreshInterval: 60000, // Refresh every minute
+      revalidateOnMount: true,
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true,
+      dedupingInterval: 0, // No deduplication
+      refreshInterval: 0, // No automatic refresh
     }
   );
 
