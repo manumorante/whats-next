@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import type { ScoredActivity } from '@/types';
 import { CATEGORY_OPTIONS, ENERGY_OPTIONS, PRIORITY_OPTIONS } from '@/types/constants';
@@ -32,9 +33,11 @@ export function ActivityCard({ activity, score, reasons }: ScoredActivity) {
     >
       {/* Title */}
       <div>
-        <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
-          {activity.title}
-        </h3>
+        <Link href={`/activity/${activity.id}`}>
+          <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer">
+            {activity.title}
+          </h3>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
