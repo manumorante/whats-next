@@ -11,34 +11,15 @@ import type {
   CreateActivityResponse,
   DeleteActivityResponse,
   ErrorResponse,
-  GetActivitiesFilters,
   GetActivitiesResponse,
   UpdateActivityRequest,
   UpdateActivityResponse,
 } from '@/types/api';
 
-// GET /api/activities - Get all activities with optional filters
+// GET /api/activities - Get all activities
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-
-    const filters: GetActivitiesFilters = {};
-
-    if (searchParams.has('category_id')) {
-      filters.category_id = Number(searchParams.get('category_id'));
-    }
-
-    if (searchParams.has('priority')) {
-      const priority = searchParams.get('priority');
-      if (priority) filters.priority = Number(priority) as GetActivitiesFilters['priority'];
-    }
-
-    if (searchParams.has('energy')) {
-      const energy = searchParams.get('energy');
-      if (energy) filters.energy = Number(energy) as GetActivitiesFilters['energy'];
-    }
-
-    const activities = await getActivities(filters);
+    const activities = await getActivities();
     const response: GetActivitiesResponse = { success: true, data: activities };
     return NextResponse.json(response);
   } catch (error) {

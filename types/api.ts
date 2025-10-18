@@ -25,12 +25,6 @@ export interface UpdateContextRequest {
   time_end?: string;
 }
 
-export interface GetActivitiesFilters {
-  category?: Category;
-  priority?: Priority;
-  energy?: Energy;
-}
-
 // Response types
 export interface GetActivitiesResponse {
   success: true;

@@ -11,10 +11,10 @@ export function useActiveContexts() {
   });
 
   // Calculate active contexts on the client side
-  const activeContexts = data ? calculateActiveContexts(data) : [];
+  const contexts = data ? calculateActiveContexts(data) : [];
 
   return {
-    activeContexts,
+    contexts,
     allContexts: data,
     isLoading,
     error,

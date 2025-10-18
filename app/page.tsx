@@ -2,14 +2,28 @@
 
 import { ActivityCard } from '@/components/ActivityCard';
 import { Loading } from '@/components/Loading';
-import { useScoredActivities } from '@/hooks/useScoredActivities';
-import type { ScoredActivity } from '@/types';
+import { useActiveContexts } from '@/hooks/useActiveContexts';
+import { useActivities } from '@/hooks/useActivities';
+import { calculateActivityScore } from '@/lib/scoring';
+import type { Activity, ScoredActivity } from '@/types';
 
 export default function Home() {
   const currentTime = new Date();
   const dayName = currentTime.toLocaleDateString('es-ES', { weekday: 'short' });
 
-  const { scoredActivities, contexts, isLoading, error } = useScoredActivities();
+  const { contexts, isLoading: contextsLoading, error: contextsError } = useActiveContexts();
+  const { activities, isLoading: activitiesLoading, error: activitiesError } = useActivities();
+
+  const isLoading = contextsLoading || activitiesLoading;
+  const error = contextsError || activitiesError;
+
+  // Calculate scored activities when both data are available
+  const scoredActivities =
+    activities.length > 0
+      ? activities
+          .map((activity: Activity) => calculateActivityScore(activity, contexts))
+          .sort((a: ScoredActivity, b: ScoredActivity) => (b.score || 0) - (a.score || 0))
+      : [];
 
   if (isLoading) {
     return (

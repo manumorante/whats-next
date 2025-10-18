@@ -1,14 +1,11 @@
 import { db } from '@/lib/db';
 import type { Activity, Category, Energy, Priority } from '@/types';
-import type {
-  CreateActivityRequest,
-  GetActivitiesFilters,
-  UpdateActivityRequest,
-} from '@/types/api';
+import type { CreateActivityRequest, UpdateActivityRequest } from '@/types/api';
 
 // GET ACTIVITIES
-export async function getActivities(filters?: GetActivitiesFilters): Promise<Activity[]> {
-  let sql = `
+export async function getActivities(): Promise<Activity[]> {
+  // Obtener todas las actividades con información de cuántas veces se han completado
+  const sql = `
     SELECT
       a.id,
       a.title,
@@ -19,33 +16,10 @@ export async function getActivities(filters?: GetActivitiesFilters): Promise<Act
       MAX(ac.completed_at) as last_completed
     FROM activities a
     LEFT JOIN activity_completions ac ON a.id = ac.activity_id
+    GROUP BY a.id ORDER BY a.priority DESC, a.created_at DESC
   `;
 
-  const conditions: string[] = [];
-  const args: (string | number)[] = [];
-
-  if (filters?.category) {
-    conditions.push('a.category = ?');
-    args.push(filters.category);
-  }
-
-  if (filters?.priority) {
-    conditions.push('a.priority = ?');
-    args.push(filters.priority);
-  }
-
-  if (filters?.energy) {
-    conditions.push('a.energy = ?');
-    args.push(filters.energy);
-  }
-
-  if (conditions.length > 0) {
-    sql += ` WHERE ${conditions.join(' AND ')}`;
-  }
-
-  sql += ' GROUP BY a.id ORDER BY a.priority DESC, a.created_at DESC';
-
-  const result = await db.execute({ sql, args });
+  const result = await db.execute({ sql });
 
   const activities: Activity[] = [];
 
@@ -86,41 +60,6 @@ export async function getActivities(filters?: GetActivitiesFilters): Promise<Act
   return activities;
 }
 
-// TEST FUNCTION
-export async function testGetActivities(): Promise<{
-  success: boolean;
-  count: number;
-  activities: Array<{
-    id: number;
-    title: string;
-    energy: number;
-    priority: number;
-  }>;
-}> {
-  try {
-    console.log('Testing getActivities...');
-
-    const result = await db.execute({
-      sql: 'SELECT id, title, energy, priority FROM activities LIMIT 3',
-    });
-
-    console.log('Raw result:', result.rows);
-
-    return {
-      success: true,
-      count: result.rows.length,
-      activities: result.rows.map((row) => ({
-        id: row.id as number,
-        title: row.title as string,
-        energy: row.energy as number,
-        priority: row.priority as number,
-      })),
-    };
-  } catch (error) {
-    console.error('Error in testGetActivities:', error);
-    throw error;
-  }
-}
 export async function getActivityById(id: number): Promise<Activity | null> {
   const activities = await getActivities();
   return activities.find((a) => a.id === id) || null;
