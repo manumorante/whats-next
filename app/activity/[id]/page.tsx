@@ -1,9 +1,12 @@
 'use client';
 
-import { type FormEvent, use } from 'react';
+import Link from 'next/link';
+import { type FormEvent, use, useState } from 'react';
 import { Loading } from '@/components/Loading';
 import { useActivity } from '@/hooks/useActivity';
 import { useAllContexts } from '@/hooks/useAllContexts';
+import type { Category, Energy, Priority } from '@/types';
+import type { UpdateActivityRequest } from '@/types/api';
 import { CATEGORY_OPTIONS, ENERGY_OPTIONS, PRIORITY_OPTIONS } from '@/types/constants';
 
 interface ActivityDetailPageProps {
@@ -14,35 +17,107 @@ interface ActivityDetailPageProps {
 
 export default function ActivityDetailPage({ params }: ActivityDetailPageProps) {
   const resolvedParams = use(params);
-  const { activity, isLoading, error } = useActivity(Number(resolvedParams.id));
+  const { activity, isLoading, error, mutate } = useActivity(Number(resolvedParams.id));
   const {
     contexts: allContexts,
     isLoading: contextsLoading,
     error: contextsError,
   } = useAllContexts();
 
-  // Función para manejar el envío del formulario
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
+  // Estados para el formulario
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState<{
+    type: 'success' | 'error';
+    text: string;
+  } | null>(null);
 
-    // Log de datos raw del FormData
-    console.log('=== DATOS DEL FORMULARIO ===');
-    console.log('FormData raw:');
-    for (const [key, value] of formData.entries()) {
-      console.log(`${key}:`, value);
+  // Función para manejar el envío del formulario
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitMessage(null);
+
+    try {
+      const formData = new FormData(e.currentTarget);
+
+      const data: UpdateActivityRequest = {
+        title: formData.get('title') as string,
+        category: Number(formData.get('category')) as Category,
+        energy: Number(formData.get('energy')) as Energy,
+        priority: Number(formData.get('priority')) as Priority,
+        contexts: Array.from(formData.getAll('contexts')).map(Number),
+      };
+
+      console.log('Enviando datos:', data);
+
+      // Enviar datos a través de la API route
+      const response = await fetch(`/api/activities?id=${resolvedParams.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al guardar los cambios');
+      }
+
+      setSubmitMessage({ type: 'success', text: 'Cambios guardados exitosamente' });
+
+      // Refrescar los datos usando SWR mutate
+      await mutate();
+    } catch (error) {
+      console.error('Error al guardar:', error);
+      setSubmitMessage({
+        type: 'error',
+        text: error instanceof Error ? error.message : 'Error al guardar los cambios',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Función para manejar la eliminación
+  const handleDelete = async () => {
+    if (
+      !confirm(
+        '¿Estás seguro de que quieres eliminar esta actividad? Esta acción no se puede deshacer.'
+      )
+    ) {
+      return;
     }
 
-    // Log de datos procesados
-    const data = {
-      category: Number(formData.get('category')),
-      energy: Number(formData.get('energy')),
-      priority: Number(formData.get('priority')),
-      contexts: Array.from(formData.getAll('contexts')).map(Number),
-    };
+    setIsDeleting(true);
+    setSubmitMessage(null);
 
-    console.log('Datos procesados:', data);
-    console.log('============================');
+    try {
+      const response = await fetch(`/api/activities?id=${resolvedParams.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al eliminar la actividad');
+      }
+
+      setSubmitMessage({ type: 'success', text: 'Actividad eliminada exitosamente' });
+
+      // Redirigir a la página principal después de un breve delay
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 1500);
+    } catch (error) {
+      console.error('Error al eliminar:', error);
+      setSubmitMessage({
+        type: 'error',
+        text: error instanceof Error ? error.message : 'Error al eliminar la actividad',
+      });
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   if (isLoading || contextsLoading) {
@@ -76,19 +151,37 @@ export default function ActivityDetailPage({ params }: ActivityDetailPageProps) 
   return (
     <div className="mx-auto flex min-h-[100svh] w-full max-w-3xl flex-col gap-4 px-6 pb-20 pt-8">
       <header className="flex flex-col">
+        <Link href="/" className="text-sm text-neutral-600 dark:text-neutral-400">
+          Volver
+        </Link>
         <h1 className="text-4xl font-bold text-black dark:text-neutral-200">{activity.title}</h1>
       </header>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="rounded-lg bg-neutral-100 dark:bg-neutral-800 p-4">
-          <h2 className="text-lg font-semibold mb-4">Editar Actividad</h2>
-          <div className="space-y-2 text-sm">
+          {/* input para editar titulo */}
+          <div className="mb-6">
+            <div className="uppercase text-sm text-neutral-600 dark:text-neutral-400 mb-2">
+              Título
+            </div>
+            <input
+              type="text"
+              name="title"
+              defaultValue={activity.title}
+              className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Título de la actividad"
+            />
+          </div>
+
+          <div className="flex gap-4">
             <div>
-              <strong>Categoría:</strong>
+              <div className="uppercase text-sm text-neutral-600 dark:text-neutral-400">
+                Categoría
+              </div>
               <select
                 name="category"
                 defaultValue={activity.category}
-                className="ml-2 px-2 py-1 border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-800 text-sm"
+                className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 {CATEGORY_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -98,11 +191,13 @@ export default function ActivityDetailPage({ params }: ActivityDetailPageProps) 
               </select>
             </div>
             <div>
-              <strong>Energía:</strong>
+              <div className="uppercase text-sm text-neutral-600 dark:text-neutral-400">
+                Energía
+              </div>
               <select
                 name="energy"
                 defaultValue={activity.energy}
-                className="ml-2 px-2 py-1 border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-800 text-sm"
+                className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 {ENERGY_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -112,11 +207,13 @@ export default function ActivityDetailPage({ params }: ActivityDetailPageProps) 
               </select>
             </div>
             <div>
-              <strong>Prioridad:</strong>
+              <div className="uppercase text-sm text-neutral-600 dark:text-neutral-400">
+                Prioridad
+              </div>
               <select
                 name="priority"
                 defaultValue={activity.priority}
-                className="ml-2 px-2 py-1 border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-800 text-sm"
+                className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 {PRIORITY_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -141,46 +238,81 @@ export default function ActivityDetailPage({ params }: ActivityDetailPageProps) 
                   defaultChecked={activity.contexts?.some((ctx) => ctx.id === context.id)}
                   className="mt-1 h-4 w-4 text-blue-600 border-neutral-300 rounded focus:ring-blue-500 dark:border-neutral-600 dark:bg-neutral-700"
                 />
-                <div className="flex-1">
+                <div className="flex-1 flex justify-between">
                   <label
                     htmlFor={`context-${context.id}`}
-                    className="text-sm font-medium text-neutral-900 dark:text-neutral-100 cursor-pointer"
+                    className=" font-medium text-neutral-900 dark:text-neutral-100 cursor-pointer"
                   >
                     {context.label}
                   </label>
-                  <div className="text-xs text-neutral-600 dark:text-neutral-400 mt-1">
-                    {context.days && <p>Días: {context.days.join(', ')}</p>}
+                  <div className=" text-neutral-600 dark:text-neutral-400">
+                    {context.days && <span>{context.days.join(', ')}</span>}
                     {context.time_start && context.time_end && (
-                      <p>
-                        Horario: {context.time_start} - {context.time_end}
-                      </p>
+                      <span>
+                        {' - '}
+                        {context.time_start} - {context.time_end}
+                      </span>
                     )}
                   </div>
                 </div>
               </div>
             ))}
             {allContexts.length === 0 && (
-              <p className="text-sm text-neutral-500 dark:text-neutral-400">
+              <p className=" text-neutral-500 dark:text-neutral-400">
                 No hay contextos disponibles
               </p>
             )}
           </div>
         </div>
 
+        {/* Mensaje de feedback */}
+        {submitMessage && (
+          <div
+            className={`p-4 rounded-lg ${
+              submitMessage.type === 'success'
+                ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+            }`}
+          >
+            {submitMessage.text}
+          </div>
+        )}
+
         {/* Botones de acción */}
-        <div className="flex gap-4 justify-end">
+        <div className="flex gap-4 justify-between">
           <button
             type="button"
-            className="px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 bg-neutral-200 dark:bg-neutral-700 rounded-lg hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-colors"
+            onClick={handleDelete}
+            disabled={isSubmitting || isDeleting}
+            className={`px-4 py-2  font-medium rounded-lg transition-colors ${
+              isDeleting || isSubmitting
+                ? 'text-neutral-500 bg-neutral-300 dark:bg-neutral-600 cursor-not-allowed'
+                : 'text-white bg-red-600 hover:bg-red-700'
+            }`}
           >
-            Cancelar
+            {isDeleting ? 'Eliminando...' : 'Eliminar Actividad'}
           </button>
-          <button
-            type="submit"
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Guardar Cambios
-          </button>
+
+          <div className="flex gap-4">
+            <button
+              type="button"
+              className="px-4 py-2  font-medium text-neutral-700 dark:text-neutral-300 bg-neutral-200 dark:bg-neutral-700 rounded-lg hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-colors"
+              disabled={isSubmitting || isDeleting}
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting || isDeleting}
+              className={`px-4 py-2  font-medium rounded-lg transition-colors ${
+                isSubmitting || isDeleting
+                  ? 'text-neutral-500 bg-neutral-300 dark:bg-neutral-600 cursor-not-allowed'
+                  : 'text-white bg-blue-600 hover:bg-blue-700'
+              }`}
+            >
+              {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
+            </button>
+          </div>
         </div>
       </form>
     </div>

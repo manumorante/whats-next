@@ -13,7 +13,7 @@ export function calculateActivityScore(activity: Activity, contexts: Context[]):
   );
   if (hasActiveContext) {
     score += 50;
-    reasons.push('Coincide con contexto activo');
+    reasons.push('Contexto activo: +50 puntos');
   } else {
     score -= 50;
     reasons.push('Contextos inactivos: -50 puntos');

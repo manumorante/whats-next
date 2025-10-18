@@ -13,11 +13,15 @@ const fetcher = async (url: string): Promise<Activity> => {
 };
 
 export function useActivity(id: number) {
-  const { data, error, isLoading } = useSWR<Activity>(id ? `/api/activities/${id}` : null, fetcher);
+  const { data, error, isLoading, mutate } = useSWR<Activity>(
+    id ? `/api/activities/${id}` : null,
+    fetcher
+  );
 
   return {
     activity: data,
     isLoading,
     error,
+    mutate,
   };
 }
