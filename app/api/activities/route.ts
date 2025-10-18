@@ -1,16 +1,21 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import type {
-  CreateActivityRequest,
-  GetActivitiesFilters,
-  UpdateActivityRequest,
-} from '@/lib/types';
 import {
   createActivity,
   deleteActivity,
   getActivities,
   updateActivity,
 } from '@/services/activities';
+import type {
+  CreateActivityRequest,
+  CreateActivityResponse,
+  DeleteActivityResponse,
+  ErrorResponse,
+  GetActivitiesFilters,
+  GetActivitiesResponse,
+  UpdateActivityRequest,
+  UpdateActivityResponse,
+} from '@/types/api';
 
 // GET /api/activities - Get all activities with optional filters
 export async function GET(request: NextRequest) {
@@ -34,10 +39,12 @@ export async function GET(request: NextRequest) {
     }
 
     const activities = await getActivities(filters);
-    return NextResponse.json(activities);
+    const response: GetActivitiesResponse = { success: true, data: activities };
+    return NextResponse.json(response);
   } catch (error) {
     console.error('Error fetching activities:', error);
-    return NextResponse.json({ error: 'Failed to fetch activities' }, { status: 500 });
+    const errorResponse: ErrorResponse = { error: 'Failed to fetch activities' };
+    return NextResponse.json(errorResponse, { status: 500 });
   }
 }
 
@@ -47,15 +54,17 @@ export async function POST(request: NextRequest) {
     const body: CreateActivityRequest = await request.json();
 
     if (!body.title?.trim()) {
-      return NextResponse.json({ error: 'Title is required' }, { status: 400 });
+      const errorResponse: ErrorResponse = { error: 'Title is required' };
+      return NextResponse.json(errorResponse, { status: 400 });
     }
 
     const activityId = await createActivity(body);
-
-    return NextResponse.json({ success: true, id: activityId }, { status: 201 });
+    const response: CreateActivityResponse = { success: true, id: activityId };
+    return NextResponse.json(response, { status: 201 });
   } catch (error) {
     console.error('Error creating activity:', error);
-    return NextResponse.json({ error: 'Failed to create activity' }, { status: 500 });
+    const errorResponse: ErrorResponse = { error: 'Failed to create activity' };
+    return NextResponse.json(errorResponse, { status: 500 });
   }
 }
 
@@ -66,16 +75,19 @@ export async function PUT(request: NextRequest) {
     const id = searchParams.get('id');
 
     if (!id) {
-      return NextResponse.json({ error: 'Activity ID is required' }, { status: 400 });
+      const errorResponse: ErrorResponse = { error: 'Activity ID is required' };
+      return NextResponse.json(errorResponse, { status: 400 });
     }
 
     const body: UpdateActivityRequest = await request.json();
     await updateActivity(Number(id), body);
 
-    return NextResponse.json({ success: true });
+    const response: UpdateActivityResponse = { success: true };
+    return NextResponse.json(response);
   } catch (error) {
     console.error('Error updating activity:', error);
-    return NextResponse.json({ error: 'Failed to update activity' }, { status: 500 });
+    const errorResponse: ErrorResponse = { error: 'Failed to update activity' };
+    return NextResponse.json(errorResponse, { status: 500 });
   }
 }
 
@@ -86,13 +98,16 @@ export async function DELETE(request: NextRequest) {
     const id = searchParams.get('id');
 
     if (!id) {
-      return NextResponse.json({ error: 'Activity ID is required' }, { status: 400 });
+      const errorResponse: ErrorResponse = { error: 'Activity ID is required' };
+      return NextResponse.json(errorResponse, { status: 400 });
     }
 
     await deleteActivity(Number(id));
-    return NextResponse.json({ success: true });
+    const response: DeleteActivityResponse = { success: true };
+    return NextResponse.json(response);
   } catch (error) {
     console.error('Error deleting activity:', error);
-    return NextResponse.json({ error: 'Failed to delete activity' }, { status: 500 });
+    const errorResponse: ErrorResponse = { error: 'Failed to delete activity' };
+    return NextResponse.json(errorResponse, { status: 500 });
   }
 }

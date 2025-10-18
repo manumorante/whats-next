@@ -1,45 +1,32 @@
 import { db } from '@/lib/db';
+import type { Activity, Category, Energy, Priority } from '@/types';
 import type {
-  ActivityCompletion,
-  ActivityWithDetails,
   CreateActivityRequest,
-  Energy,
   GetActivitiesFilters,
-  Priority,
   UpdateActivityRequest,
-} from '@/lib/types';
+} from '@/types/api';
 
-// ==================================================
 // GET ACTIVITIES
-// ==================================================
-export async function getActivities(
-  filters?: GetActivitiesFilters
-): Promise<ActivityWithDetails[]> {
+export async function getActivities(filters?: GetActivitiesFilters): Promise<Activity[]> {
   let sql = `
     SELECT
       a.id,
       a.title,
-      a.description,
-      a.category_id,
+      a.category,
       a.energy,
       a.priority,
-      a.created_at,
-      c.name as category_name,
-      c.color as category_color,
-      c.icon as category_icon,
       COUNT(DISTINCT ac.completed_at) as completions_count,
       MAX(ac.completed_at) as last_completed
     FROM activities a
-    LEFT JOIN categories c ON a.category_id = c.id
     LEFT JOIN activity_completions ac ON a.id = ac.activity_id
   `;
 
   const conditions: string[] = [];
   const args: (string | number)[] = [];
 
-  if (filters?.category_id) {
-    conditions.push('a.category_id = ?');
-    args.push(filters.category_id);
+  if (filters?.category) {
+    conditions.push('a.category = ?');
+    args.push(filters.category);
   }
 
   if (filters?.priority) {
@@ -60,31 +47,18 @@ export async function getActivities(
 
   const result = await db.execute({ sql, args });
 
-  const activities: ActivityWithDetails[] = [];
+  const activities: Activity[] = [];
 
   for (const row of result.rows) {
-    const activity: ActivityWithDetails = {
+    const activity: Activity = {
       id: row.id as number,
       title: row.title as string,
-      description: row.description as string | null,
-      category_id: row.category_id as number | null,
-      energy: row.energy as Energy | null,
+      category: row.category as Category,
+      energy: row.energy as Energy,
       priority: row.priority as Priority,
-      created_at: row.created_at as string,
       completions_count: row.completions_count as number,
       last_completed: row.last_completed as string | null,
     };
-
-    // Add category if exists
-    if (row.category_name) {
-      activity.category = {
-        id: row.category_id as number,
-        name: row.category_name as string,
-        color: row.category_color as string,
-        icon: row.category_icon as string | null,
-        created_at: '',
-      };
-    }
 
     // Get contexts for this activity
     const contextsResult = await db.execute({
@@ -103,7 +77,6 @@ export async function getActivities(
       days: ctx.days ? JSON.parse(ctx.days as string) : null,
       time_start: ctx.time_start as string | null,
       time_end: ctx.time_end as string | null,
-      created_at: ctx.created_at as string,
     }));
 
     // Get time slots for this activity
@@ -113,9 +86,7 @@ export async function getActivities(
   return activities;
 }
 
-// ==================================================
 // TEST FUNCTION
-// ==================================================
 export async function testGetActivities(): Promise<{
   success: boolean;
   count: number;
@@ -150,30 +121,22 @@ export async function testGetActivities(): Promise<{
     throw error;
   }
 }
-export async function getActivityById(id: number): Promise<ActivityWithDetails | null> {
+export async function getActivityById(id: number): Promise<Activity | null> {
   const activities = await getActivities();
   return activities.find((a) => a.id === id) || null;
 }
 
-// ==================================================
 // CREATE ACTIVITY
-// ==================================================
 export async function createActivity(data: CreateActivityRequest): Promise<number> {
   // Insert activity
   const result = await db.execute({
     sql: `
       INSERT INTO activities (
-        title, description, category_id,
+        title, category,
         energy, priority
-      ) VALUES (?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?)
     `,
-    args: [
-      data.title.trim(),
-      data.description || null,
-      data.category_id || null,
-      data.energy || null,
-      data.priority || 3,
-    ],
+    args: [data.title.trim(), data.category || 1, data.energy || 2, data.priority || 3],
   });
 
   const activityId = Number(result.lastInsertRowid);
@@ -191,9 +154,7 @@ export async function createActivity(data: CreateActivityRequest): Promise<numbe
   return activityId;
 }
 
-// ==================================================
 // UPDATE ACTIVITY
-// ==================================================
 export async function updateActivity(id: number, data: UpdateActivityRequest): Promise<void> {
   const fields: string[] = [];
   const args: (string | number | null)[] = [];
@@ -203,19 +164,14 @@ export async function updateActivity(id: number, data: UpdateActivityRequest): P
     args.push(data.title ? data.title.trim() : null);
   }
 
-  if (data.description !== undefined) {
-    fields.push('description = ?');
-    args.push(data.description || null);
-  }
-
-  if (data.category_id !== undefined) {
-    fields.push('category_id = ?');
-    args.push(data.category_id || null);
+  if (data.category !== undefined) {
+    fields.push('category = ?');
+    args.push(data.category || 1);
   }
 
   if (data.energy !== undefined) {
     fields.push('energy = ?');
-    args.push(data.energy || null);
+    args.push(data.energy || 2);
   }
 
   if (data.priority !== undefined) {
@@ -251,9 +207,7 @@ export async function updateActivity(id: number, data: UpdateActivityRequest): P
   // Los horarios ahora están dentro de los contextos, no en time_slots separados
 }
 
-// ==================================================
 // DELETE ACTIVITY
-// ==================================================
 export async function deleteActivity(id: number): Promise<void> {
   await db.execute({
     sql: 'DELETE FROM activities WHERE id = ?',
@@ -262,29 +216,10 @@ export async function deleteActivity(id: number): Promise<void> {
   // Note: Cascading deletes will handle related records
 }
 
-// ==================================================
 // COMPLETE ACTIVITY (for recurring activities)
-// ==================================================
 export async function completeActivity(id: number, notes?: string): Promise<void> {
   await db.execute({
     sql: 'INSERT INTO activity_completions (activity_id, notes) VALUES (?, ?)',
     args: [id, notes || null],
   });
-}
-
-// ==================================================
-// GET ACTIVITY COMPLETIONS
-// ==================================================
-export async function getActivityCompletions(activityId: number): Promise<ActivityCompletion[]> {
-  const result = await db.execute({
-    sql: 'SELECT * FROM activity_completions WHERE activity_id = ? ORDER BY completed_at DESC',
-    args: [activityId],
-  });
-
-  return result.rows.map((row) => ({
-    id: row.id as number,
-    activity_id: row.activity_id as number,
-    completed_at: row.completed_at as string,
-    notes: row.notes as string | null,
-  }));
 }

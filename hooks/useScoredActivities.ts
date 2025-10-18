@@ -1,29 +1,34 @@
-import useSWR from 'swr';
-import type { ActivityScore } from '@/services/suggestions';
+'use client';
+
+import { useActivities } from '@/hooks/useActivities';
+import { calculateActivityScore } from '@/lib/scoring';
+import type { Activity, ScoredActivity } from '@/types';
+import { useActiveContexts } from './useActiveContexts';
 
 export function useScoredActivities() {
-  const url = '/api/suggestions';
+  const {
+    activeContexts: contexts,
+    isLoading: contextsLoading,
+    error: contextsError,
+  } = useActiveContexts();
+  const { activities, isLoading: activitiesLoading, error: activitiesError } = useActivities();
 
-  const { data, error, isLoading, mutate } = useSWR<ActivityScore[]>(
-    url,
-    async () => {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error('Failed to fetch scored activities');
-      return response.json();
-    },
-    {
-      revalidateOnMount: true,
-      revalidateOnFocus: true,
-      revalidateOnReconnect: true,
-      dedupingInterval: 0,
-      refreshInterval: 0,
-    }
-  );
+  const isLoading = contextsLoading || activitiesLoading;
+  const error = contextsError || activitiesError;
+
+  // Calculate scored activities when both data are available
+  const scoredActivities =
+    activities.length > 0 && contexts.length >= 0
+      ? activities
+          .map((activity: Activity) => calculateActivityScore(activity, contexts))
+          .sort((a: ScoredActivity, b: ScoredActivity) => (b.score || 0) - (a.score || 0))
+      : [];
 
   return {
-    scoredActivities: data ?? [],
+    scoredActivities,
+    contexts,
+    activities,
     isLoading,
-    error: error?.message ?? null,
-    reload: () => mutate(),
+    error,
   };
 }

@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-
-type Theme = 'light' | 'dark';
+import type { Theme } from '@/types';
 
 const STORAGE_KEY = 'whats-next-theme';
 

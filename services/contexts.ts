@@ -1,10 +1,8 @@
 import { db } from '@/lib/db';
-import type { ContextParsed } from '@/lib/types';
+import type { Context } from '@/types';
+import type { UpdateContextRequest } from '@/types/api';
 
-// ==================================================
-// GET ALL CONTEXTS
-// ==================================================
-export async function getContexts(): Promise<ContextParsed[]> {
+export async function getContexts(): Promise<Context[]> {
   const result = await db.execute('SELECT * FROM contexts ORDER BY name ASC');
 
   return result.rows.map((row) => ({
@@ -18,34 +16,6 @@ export async function getContexts(): Promise<ContextParsed[]> {
   }));
 }
 
-// ==================================================
-// GET CONTEXT BY ID
-// ==================================================
-export async function getContextById(id: number): Promise<ContextParsed | null> {
-  const result = await db.execute({
-    sql: 'SELECT * FROM contexts WHERE id = ?',
-    args: [id],
-  });
-
-  if (result.rows.length === 0) {
-    return null;
-  }
-
-  const row = result.rows[0];
-  return {
-    id: row.id as number,
-    name: row.name as string,
-    label: row.label as string,
-    days: row.days ? JSON.parse(row.days as string) : null,
-    time_start: row.time_start as string | null,
-    time_end: row.time_end as string | null,
-    created_at: row.created_at as string,
-  };
-}
-
-// ==================================================
-// CREATE CONTEXT
-// ==================================================
 export async function createContext(
   name: string,
   label: string,
@@ -67,19 +37,7 @@ export async function createContext(
   return Number(result.lastInsertRowid);
 }
 
-// ==================================================
-// UPDATE CONTEXT
-// ==================================================
-export async function updateContext(
-  id: number,
-  data: {
-    name?: string;
-    label?: string;
-    days?: string[];
-    time_start?: string;
-    time_end?: string;
-  }
-): Promise<void> {
+export async function updateContext(id: number, data: UpdateContextRequest): Promise<void> {
   const fields: string[] = [];
   const args: (string | number | null)[] = [];
 
@@ -117,9 +75,6 @@ export async function updateContext(
   }
 }
 
-// ==================================================
-// DELETE CONTEXT
-// ==================================================
 export async function deleteContext(id: number): Promise<void> {
   await db.execute({
     sql: 'DELETE FROM contexts WHERE id = ?',
@@ -128,10 +83,7 @@ export async function deleteContext(id: number): Promise<void> {
   // Note: Cascading deletes will handle related records
 }
 
-// ==================================================
-// GET ACTIVE CONTEXTS (for current time)
-// ==================================================
-export async function getActiveContexts(): Promise<ContextParsed[]> {
+export async function getActiveContexts(): Promise<Context[]> {
   const now = new Date();
   const currentDay = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][now.getDay()];
   const currentTime = now.toTimeString().substring(0, 5); // HH:MM format
