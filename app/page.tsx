@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { ActivityCard } from '@/components/ActivityCard';
 import { Loading } from '@/components/Loading';
 import { useActiveContexts } from '@/hooks/useActiveContexts';
@@ -17,7 +18,7 @@ export default function Home() {
   const isLoading = contextsLoading || activitiesLoading;
   const error = contextsError || activitiesError;
 
-  // Calculate scored activities when both data are available
+  // Calculate scozinc activities when both data are available
   const scoredActivities =
     activities.length > 0
       ? activities
@@ -36,7 +37,7 @@ export default function Home() {
   if (error) {
     return (
       <div className="mx-auto flex min-h-[100svh] w-full max-w-3xl flex-col gap-4 px-6 pb-20 pt-8">
-        <div className="text-center py-8 text-red-500">
+        <div className="text-center py-8 text-zinc-500">
           <p>Error al cargar datos: {error.message}</p>
         </div>
       </div>
@@ -46,36 +47,38 @@ export default function Home() {
   return (
     <div className="mx-auto flex min-h-[100svh] w-full max-w-3xl flex-col gap-4 px-6 pb-20 pt-8">
       {/* Hero */}
-      <header className="flex flex-col">
-        <div className="tracking-tight text-6xl capitalize text-black dark:text-neutral-200 leading-none font-black">
-          {dayName}
+      <div className="flex flex-col">
+        <div>
+          <div className="tracking-tight text-6xl capitalize text-black dark:text-zinc-200 leading-none font-black">
+            {dayName}
+          </div>
+          <div className="text-5xl font-extralight text-zinc-400">
+            {contexts.map((context) => context.name).join(', ')}
+          </div>
         </div>
-        <div className="text-5xl font-extralight text-neutral-400">
-          {contexts.map((context) => context.label).join(', ')}
-        </div>
-      </header>
+      </div>
 
       {/* Activities List - Ordered by Score */}
       <section className="space-y-4">
         {!scoredActivities.length ? (
-          <div className="text-center py-12 text-neutral-500">
+          <div className="text-center py-12 text-zinc-500">
             <p className="text-lg mb-2">No hay actividades</p>
           </div>
         ) : (
           <div className="space-y-3">
-            {scoredActivities.map((scoredActivity: ScoredActivity) => (
+            {scoredActivities.map((scozincActivity: ScoredActivity) => (
               <ActivityCard
-                key={scoredActivity.activity.id}
-                activity={scoredActivity.activity}
-                score={scoredActivity.score}
-                reasons={scoredActivity.reasons}
+                key={scozincActivity.activity.id}
+                activity={scozincActivity.activity}
+                score={scozincActivity.score}
+                reasons={scozincActivity.reasons}
               />
             ))}
           </div>
         )}
       </section>
 
-      <footer className="mt-auto text-center text-xs text-neutral-500 dark:text-neutral-500">
+      <footer className="mt-auto text-center text-base text-zinc-500 dark:text-zinc-500">
         Las actividades se ordenan por puntuación automáticamente
       </footer>
     </div>

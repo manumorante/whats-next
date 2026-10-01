@@ -8,7 +8,6 @@ export type Theme = 'light' | 'dark';
 export interface Context {
   id: number;
   name: string;
-  label: string;
   days: string[] | null;
   time_start: string | null;
   time_end: string | null;

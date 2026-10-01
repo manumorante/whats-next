@@ -25,17 +25,13 @@ export async function GET(request: NextRequest) {
 // POST /api/contexts - Create new context
 export async function POST(request: NextRequest) {
   try {
-    const { name, label, days, time_start, time_end } = await request.json();
+    const { name, days, time_start, time_end } = await request.json();
 
     if (!name?.trim()) {
       return NextResponse.json({ error: 'Name is required' }, { status: 400 });
     }
 
-    if (!label?.trim()) {
-      return NextResponse.json({ error: 'Label is required' }, { status: 400 });
-    }
-
-    const contextId = await createContext(name, label, days, time_start, time_end);
+    const contextId = await createContext(name, days, time_start, time_end);
 
     return NextResponse.json({ success: true, id: contextId }, { status: 201 });
   } catch (error) {

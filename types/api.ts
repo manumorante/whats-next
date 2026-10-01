@@ -19,7 +19,6 @@ export interface UpdateActivityRequest {
 
 export interface UpdateContextRequest {
   name?: string;
-  label?: string;
   days?: string[];
   time_start?: string;
   time_end?: string;

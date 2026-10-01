@@ -8,7 +8,6 @@ export async function getContexts(): Promise<Context[]> {
   return result.rows.map((row) => ({
     id: row.id as number,
     name: row.name as string,
-    label: row.label as string,
     days: row.days ? JSON.parse(row.days as string) : null,
     time_start: row.time_start as string | null,
     time_end: row.time_end as string | null,
@@ -18,20 +17,13 @@ export async function getContexts(): Promise<Context[]> {
 
 export async function createContext(
   name: string,
-  label: string,
   days?: string[],
   time_start?: string,
   time_end?: string
 ): Promise<number> {
   const result = await db.execute({
-    sql: 'INSERT INTO contexts (name, label, days, time_start, time_end) VALUES (?, ?, ?, ?, ?)',
-    args: [
-      name.trim(),
-      label.trim(),
-      days ? JSON.stringify(days) : null,
-      time_start || null,
-      time_end || null,
-    ],
+    sql: 'INSERT INTO contexts (name, days, time_start, time_end) VALUES (?, ?, ?, ?)',
+    args: [name.trim(), days ? JSON.stringify(days) : null, time_start || null, time_end || null],
   });
 
   return Number(result.lastInsertRowid);
@@ -44,11 +36,6 @@ export async function updateContext(id: number, data: UpdateContextRequest): Pro
   if (data.name !== undefined) {
     fields.push('name = ?');
     args.push(data.name.trim());
-  }
-
-  if (data.label !== undefined) {
-    fields.push('label = ?');
-    args.push(data.label.trim());
   }
 
   if (data.days !== undefined) {
