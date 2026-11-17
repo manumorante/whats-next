@@ -18,7 +18,7 @@
     "@heroicons/react": "^2.2.0",
     "@libsql/client": "^0.15.15",
     "clsx": "^2.1.1",
-    "next": "15.5.4",
+    "next": "16.4.6",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "swr": "^2.3.6",
@@ -34,9 +34,9 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^5.0.4",
-    "happy-dom": "^20.0.0",
+    "happy-dom": "^21.0.4",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "vitest": "^3.2.4"
+    "vitest": "^4.1.11"
   }
 }
